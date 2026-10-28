@@ -6,6 +6,7 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { FilterSelect, SearchParamInput } from "@/components/admin/client"
+import { useI18n } from "@/lib/i18n"
 
 const FILTER_PARAMS = ["org", "actor", "action", "from", "to", "actorId", "targetType", "targetId", "page"]
 
@@ -27,6 +28,7 @@ function useUpdateParams() {
 
 /** Free-text action prefix with suggestions (prefixes + actions seen so far). */
 function ActionPrefixInput({ suggestions }: { suggestions: string[] }) {
+  const { t } = useI18n()
   const params = useSearchParams()
   const update = useUpdateParams()
   const [value, setValue] = useState(params.get("action") ?? "")
@@ -42,7 +44,7 @@ function ActionPrefixInput({ suggestions }: { suggestions: string[] }) {
       <Input
         list="audit-action-suggestions"
         value={value}
-        placeholder="Action prefix, e.g. admin."
+        placeholder={t("actionPrefixPlaceholder")}
         aria-label="Filter by action prefix"
         spellCheck={false}
         autoComplete="off"
@@ -97,6 +99,7 @@ function DateInput({ param, label }: { param: "from" | "to"; label: string }) {
 }
 
 export function AuditFilters({ workspaces, suggestions }: { workspaces: { id: string; name: string }[]; suggestions: string[] }) {
+  const { t } = useI18n()
   const params = useSearchParams()
   const update = useUpdateParams()
   // Remount the debounced text inputs after "Clear filters" so their local state resets
@@ -123,7 +126,7 @@ export function AuditFilters({ workspaces, suggestions }: { workspaces: { id: st
   return (
     <div className="mb-4 space-y-2">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <SearchParamInput key={`actor-${resetKey}`} param="actor" placeholder="Actor email…" className="sm:w-56" />
+        <SearchParamInput key={`actor-${resetKey}`} param="actor" placeholder={t("actorEmailPlaceholder")} className="sm:w-56" />
         <ActionPrefixInput key={`action-${resetKey}`} suggestions={suggestions} />
         <FilterSelect
           param="org"

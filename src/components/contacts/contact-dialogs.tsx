@@ -16,6 +16,7 @@ import { ApiClientError } from "@/lib/api-client"
 import { cn } from "@/lib/utils"
 import { FIELD_LABELS, guessMapping, parseCsv, rowsToContacts, type ContactField } from "./csv"
 import { useContactMutations, type ContactDto } from "./use-contacts"
+import { useI18n } from "@/lib/i18n"
 
 /* ------------------------------ Create contact ----------------------------- */
 
@@ -52,6 +53,7 @@ function NewContactForm({
   onCreated?: (contact: ContactDto) => void
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const { can } = useOrg()
   const canShare = can("contacts.manage")
   const { create } = useContactMutations(slug)
@@ -98,11 +100,11 @@ function NewContactForm({
       <div className="grid gap-3">
         <div className="grid gap-1.5">
           <Label htmlFor="nc-email">Email</Label>
-          <Input id="nc-email" type="email" required autoFocus value={form.email} onChange={set("email")} placeholder="jane@company.com" aria-invalid={Boolean(error)} />
+          <Input id="nc-email" type="email" required autoFocus value={form.email} onChange={set("email")} placeholder={t("contactEmailPlaceholder")} aria-invalid={Boolean(error)} />
         </div>
         <div className="grid gap-1.5">
           <Label htmlFor="nc-name">Name</Label>
-          <Input id="nc-name" value={form.name} onChange={set("name")} placeholder="Jane Doe" />
+          <Input id="nc-name" value={form.name} onChange={set("name")} placeholder={t("contactNamePlaceholder")} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-1.5">
