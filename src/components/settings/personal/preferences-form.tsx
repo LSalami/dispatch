@@ -11,6 +11,7 @@ import { OptionCards } from "@/components/settings/personal/option-cards"
 import { useServerAction } from "@/components/settings/use-server-action"
 import { updatePreferences } from "@/server/workspace/actions/personal"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 export type PreferencesValue = {
   theme: "light" | "dark" | "system"
@@ -59,6 +60,7 @@ export function PreferencesForm({
   instanceRemoteImages: "always" | "ask" | "never"
 }) {
   const { setTheme } = useTheme()
+  const { t } = useI18n()
   const [saved, setSaved] = useState(initial)
   const [form, setForm] = useState(initial)
   const dirty = JSON.stringify(form) !== JSON.stringify(saved)
@@ -78,35 +80,35 @@ export function PreferencesForm({
 
   return (
     <>
-      <SettingsSection title="Appearance" description="Theme and density apply to this device right away and follow you everywhere once saved.">
+      <SettingsSection title={t("appearance")} description="Theme and density apply to this device right away and follow you everywhere once saved.">
         <div className="flex flex-col gap-6">
           <OptionCards
-            label="Theme"
+            label={t("theme")}
             value={form.theme}
             onChange={(v) => {
               set("theme", v)
               setTheme(v)
             }}
             options={[
-              { value: "light", label: "Light", icon: <Sun />, preview: <ThemePreview mode="light" /> },
-              { value: "dark", label: "Dark", icon: <Moon />, preview: <ThemePreview mode="dark" /> },
-              { value: "system", label: "System", icon: <Monitor />, preview: <ThemePreview mode="system" /> },
+              { value: "light", label: t("light"), icon: <Sun />, preview: <ThemePreview mode="light" /> },
+              { value: "dark", label: t("dark"), icon: <Moon />, preview: <ThemePreview mode="dark" /> },
+              { value: "system", label: t("system"), icon: <Monitor />, preview: <ThemePreview mode="system" /> },
             ]}
           />
           <OptionCards
-            label="Density"
+            label={t("density")}
             columns={2}
             value={form.density}
             onChange={(v) => set("density", v)}
             options={[
-              { value: "comfortable", label: "Comfortable", description: "Two-line previews with more breathing room." },
-              { value: "compact", label: "Compact", description: "Single-line rows — see more conversations at once." },
+              { value: "comfortable", label: t("comfortable"), description: "Two-line previews with more breathing room." },
+              { value: "compact", label: t("compact"), description: "Single-line rows — see more conversations at once." },
             ]}
           />
         </div>
       </SettingsSection>
 
-      <SettingsSection title="Language" description="Choose the language used by Dispatch.">
+      <SettingsSection title={t("language")} description={t("languageHelp")}>
         <OptionCards
           label="Interface language"
           value={form.locale}
@@ -118,10 +120,10 @@ export function PreferencesForm({
         />
       </SettingsSection>
 
-      <SettingsSection title="Sending & reading">
+      <SettingsSection title={t("sendingReading")}>
         <SettingsRows>
           <SettingsRow
-            label="Undo send"
+            label={t("undoSend")}
             description="Delay outgoing emails so you can cancel them. Scheduled messages aren't affected."
             htmlFor="undo-send"
           >
@@ -133,25 +135,25 @@ export function PreferencesForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="default">Workspace default ({workspaceUndoSeconds ? `${workspaceUndoSeconds}s` : "off"})</SelectItem>
-                <SelectItem value="0">Off</SelectItem>
+                <SelectItem value="default">{t("defaultWorkspace")} ({workspaceUndoSeconds ? `${workspaceUndoSeconds}s` : t("off")})</SelectItem>
+                <SelectItem value="0">{t("off")}</SelectItem>
                 {[5, 10, 15, 20, 30].map((s) => (
                   <SelectItem key={s} value={String(s)}>
-                    {s} seconds
+                    {s} {t("seconds")}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </SettingsRow>
           <SettingsRow
-            label="Send & archive"
+            label={t("sendArchive")}
             description="Close the conversation when you send a reply, so your inbox stays clear."
             htmlFor="send-archive"
           >
             <Switch id="send-archive" checked={form.sendAndArchive} onCheckedChange={(v) => set("sendAndArchive", v)} />
           </SettingsRow>
           <SettingsRow
-            label="Remote images"
+            label={t("remoteImages")}
             htmlFor="remote-images"
             description={
               instanceRemoteImages === "never"
@@ -177,9 +179,9 @@ export function PreferencesForm({
         </SettingsRows>
       </SettingsSection>
 
-      <SettingsSection title="Keyboard shortcuts" description="Fly through your inbox without touching the mouse.">
+      <SettingsSection title={t("keyboardShortcuts")} description="Fly through your inbox without touching the mouse.">
         <OptionCards
-          label="Keyboard shortcuts"
+          label={t("keyboardShortcuts")}
           value={form.shortcuts}
           onChange={(v) => set("shortcuts", v)}
           options={[
