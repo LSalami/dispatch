@@ -102,7 +102,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
             .
           </>
         ) : (
-          <>{italian ? "Accesso senza password · sessioni attive per " : "Passwordless sign-in · sessions stay active for "}{auth.sessionDays >= 365 ? (italian ? "un anno" : "a year") : `${auth.sessionDays} ${italian ? "giorni" : "days"}`}</>
+          <>{italian ? "Accesso con password o codice email · sessioni attive per " : "Sign in with a password or email code · sessions stay active for "}{auth.sessionDays >= 365 ? (italian ? "un anno" : "a year") : `${auth.sessionDays} ${italian ? "giorni" : "days"}`}</>
         )
       }
     >
