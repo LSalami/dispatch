@@ -414,7 +414,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                         <div className="ml-auto flex items-center gap-1 sm:ml-2">
                           {emailDelivery && (
                             <Button variant="outline" size="sm" onClick={() => void shareLink(inv, true)}>
-                              <RefreshCw /> {t("memResend")}
+                              <RefreshCw /> {t("invResend")}
                             </Button>
                           )}
                           <DropdownMenu>
