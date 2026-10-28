@@ -96,6 +96,12 @@ export function useI18n() {
 }
 
 const italianErrors: Record<string, string> = {
+  "This invitation is no longer valid.": "Questo invito non è più valido.",
+  "This invitation has already been used.": "Questo invito è già stato utilizzato.",
+  "This invitation has expired. Ask for a new one.": "Questo invito è scaduto. Chiedi di riceverne uno nuovo.",
+  "This workspace no longer exists.": "Questo workspace non esiste più.",
+  "Could not create the account.": "Impossibile creare l'account.",
+  "Use at least 12 characters": "Usa almeno 12 caratteri",
   "The email or password is incorrect.": "L’email o la password non sono corrette.",
   "Invalid email address": "Indirizzo email non valido.",
   "Something went wrong": "Qualcosa è andato storto.",

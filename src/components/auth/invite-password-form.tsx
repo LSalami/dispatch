@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { PasswordInput } from "@/components/ui/password-input"
 import { Spinner } from "@/components/ui/spinner"
-import { useI18n } from "@/lib/i18n"
+import { localizeError, useI18n } from "@/lib/i18n"
 import { setInvitePasswordAction } from "@/app/invite/[token]/actions"
 
 export function InvitePasswordForm({ token, email }: { token: string; email: string }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [password, setPassword] = useState("")
   const [confirm, setConfirm] = useState("")
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +22,7 @@ export function InvitePasswordForm({ token, email }: { token: string; email: str
     setError(null)
     startTransition(async () => {
       const result = await setInvitePasswordAction({ token, password })
-      if (result && !result.ok) setError(result.error)
+      if (result && !result.ok) setError(localizeError(result.error, locale))
     })
   }
 
