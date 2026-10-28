@@ -152,7 +152,7 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
                         })
                       }
                     >
-                      <Send /> {t("sendTest")}
+                      <Send /> {t("sendTestEvent")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setDeliveries({ open: true, hook: w })}>
                       <History /> {t("viewDeliveries")}
@@ -162,7 +162,7 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive" onClick={() => setDeleting({ open: true, hook: w })}>
-                      <Trash2 /> {t("delete")}
+                      <Trash2 /> {t("deleteForever")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
