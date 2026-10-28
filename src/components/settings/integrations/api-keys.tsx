@@ -29,6 +29,7 @@ import { createApiKey, revokeApiKey } from "@/server/workspace/actions/integrati
 import type { ApiKeyRow } from "@/server/workspace/queries/integrations"
 import { PERMISSION_GROUPS, PERMISSIONS, type Permission } from "@/lib/permissions"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 type KeyStatus = "active" | "expired" | "revoked"
 
@@ -39,6 +40,7 @@ function keyStatus(k: ApiKeyRow, now: number): KeyStatus {
 }
 
 export function ApiKeysSection({ slug, keys, appUrl, now }: { slug: string; keys: ApiKeyRow[]; appUrl: string; now: number }) {
+  const { t } = useI18n()
   const [createOpen, setCreateOpen] = useState(false)
   const [showInactive, setShowInactive] = useState(false)
   const withStatus = keys.map((k) => ({ ...k, status: keyStatus(k, now) }))
@@ -48,11 +50,11 @@ export function ApiKeysSection({ slug, keys, appUrl, now }: { slug: string; keys
   return (
     <SettingsSection
       id="api-keys"
-      title="API keys"
-      description="Keys authenticate requests to the REST API. A key acts as the member who created it, optionally limited to a subset of their permissions."
+      title={t("apiKeys")}
+      description={t("apiKeysDescription")}
       action={
         <Button size="sm" onClick={() => setCreateOpen(true)}>
-          <Plus /> Create API key
+          <Plus /> {t("createApiKey")}
         </Button>
       }
       flush
@@ -61,18 +63,18 @@ export function ApiKeysSection({ slug, keys, appUrl, now }: { slug: string; keys
         <div className="px-5 pb-5">
           <EmptyState
             icon={<KeyRound />}
-            title="No API keys yet"
+            title={t("noApiKeys")}
             description="Create a key to read conversations, send replies or sync contacts from your own tools."
           >
             <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
-              <Plus /> Create your first key
+              <Plus /> {t("createFirstKey")}
             </Button>
           </EmptyState>
         </div>
       ) : (
         <div className="border-t">
           {active.length === 0 && (
-            <p className="px-5 py-4 text-[13px] text-muted-foreground">No active keys. Revoked and expired keys are listed below.</p>
+            <p className="px-5 py-4 text-[13px] text-muted-foreground">{t("noActiveKeys")}</p>
           )}
           <ul className="divide-y">
             {active.map((k) => (

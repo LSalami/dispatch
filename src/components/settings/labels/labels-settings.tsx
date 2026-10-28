@@ -12,6 +12,7 @@ import { deleteLabel, reorderLabels, updateLabel } from "@/server/workspace/acti
 import { LabelDialog, type LabelDialogState } from "./label-dialog"
 import { LabelTree, type TreeHandlers } from "./label-tree"
 import { descendantIds, MAX_LABEL_DEPTH, type LabelItem } from "./label-utils"
+import { useI18n } from "@/lib/i18n"
 
 type Data = { shared: LabelItem[]; private: LabelItem[] }
 
@@ -26,6 +27,7 @@ export function LabelsSettings({
   initial: Data
   canManageShared: boolean
 }) {
+  const { t } = useI18n()
   // Local copy for optimistic reordering; re-synced when the server data changes
   const [data, setData] = useState<Data>(initial)
   const [synced, setSynced] = useState<Data>(initial)
@@ -83,26 +85,26 @@ export function LabelsSettings({
   return (
     <SettingsPage
       eyebrow="Productivity"
-      title="Labels"
+      title={t("labelsTitle")}
       quiet="to organize every conversation"
       description="Labels group conversations across inboxes and can appear as their own mailboxes in the sidebar. Workspace labels are shared with everyone; private labels are only visible to you."
       actions={
         <Button onClick={() => setDialog({ mode: "create", visibility: canManageShared ? "shared" : "private", parentId: null })}>
-          <Plus /> New label
+          <Plus /> {t("newLabel")}
         </Button>
       }
     >
       <SettingsSection
-        title="Workspace labels"
+        title={t("workspaceLabels")}
         description={`Shared with everyone in ${orgName}.`}
         action={
           canManageShared ? (
             <Button variant="outline" size="sm" onClick={() => setDialog({ mode: "create", visibility: "shared", parentId: null })}>
-              <Plus /> Add
+              <Plus /> {t("add")}
             </Button>
           ) : (
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Lock className="size-3.5" /> Managed by admins
+              <Lock className="size-3.5" /> {t("managedByAdmins")}
             </span>
           )
         }
@@ -125,12 +127,12 @@ export function LabelsSettings({
           <div className="px-5 pb-5">
             <EmptyState
               icon={<Tags />}
-              title="No workspace labels yet"
+              title={t("noWorkspaceLabels")}
               description={canManageShared ? "Create labels like “Billing” or “Bug” to triage faster." : "Admins haven't created any shared labels yet."}
             >
               {canManageShared && (
                 <Button size="sm" onClick={() => setDialog({ mode: "create", visibility: "shared", parentId: null })}>
-                  <Plus /> Create a label
+                  <Plus /> {t("createLabel")}
                 </Button>
               )}
             </EmptyState>
@@ -139,11 +141,11 @@ export function LabelsSettings({
       </SettingsSection>
 
       <SettingsSection
-        title="My private labels"
+        title={t("myPrivateLabels")}
         description="Only you can see these labels and which conversations they're on."
         action={
           <Button variant="outline" size="sm" onClick={() => setDialog({ mode: "create", visibility: "private", parentId: null })}>
-            <Plus /> Add
+            <Plus /> {t("add")}
           </Button>
         }
         flush
@@ -155,11 +157,11 @@ export function LabelsSettings({
           <div className="px-5 pb-5">
             <EmptyState
               icon={<Lock />}
-              title="No private labels"
+              title={t("noPrivateLabels")}
               description="Keep personal follow-ups organized — “To read”, “Waiting on reply”…"
             >
               <Button size="sm" variant="outline" onClick={() => setDialog({ mode: "create", visibility: "private", parentId: null })}>
-                <Plus /> Create a private label
+                <Plus /> {t("createPrivateLabel")}
               </Button>
             </EmptyState>
           </div>
@@ -191,7 +193,7 @@ export function LabelsSettings({
             </>
           )
         }
-        confirmLabel="Delete label"
+        confirmLabel={t("deleteLabel")}
         destructive
         onConfirm={async () => {
           if (!deleting) return

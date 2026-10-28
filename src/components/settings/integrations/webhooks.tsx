@@ -28,11 +28,12 @@ import {
 } from "@/server/workspace/actions/integrations"
 import type { WebhookRow } from "@/server/workspace/queries/integrations"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
-function HealthBadge({ w }: { w: WebhookRow }) {
-  if (!w.enabled) return <StatusBadge tone="neutral">Paused</StatusBadge>
-  if (w.lastStatus === null) return <StatusBadge tone="neutral">No deliveries yet</StatusBadge>
-  if (w.lastStatus >= 200 && w.lastStatus < 300 && w.failureCount === 0) return <StatusBadge tone="success">Healthy</StatusBadge>
+function HealthBadge({ w, t }: { w: WebhookRow; t: (key: any) => string }) {
+  if (!w.enabled) return <StatusBadge tone="neutral">{t("paused")}</StatusBadge>
+  if (w.lastStatus === null) return <StatusBadge tone="neutral">{t("noDeliveries")}</StatusBadge>
+  if (w.lastStatus >= 200 && w.lastStatus < 300 && w.failureCount === 0) return <StatusBadge tone="success">{t("healthy")}</StatusBadge>
   return (
     <StatusBadge tone={w.failureCount >= 3 ? "danger" : "warning"}>
       {w.failureCount > 0 ? `Failing · ${w.failureCount}` : `Last ${w.lastStatus || "error"}`}
@@ -41,6 +42,7 @@ function HealthBadge({ w }: { w: WebhookRow }) {
 }
 
 export function WebhooksSection({ slug, webhooks, events }: { slug: string; webhooks: WebhookRow[]; events: readonly string[] }) {
+  const { t } = useI18n()
   const [dialog, setDialog] = useState<{ open: boolean; webhook: WebhookRow | null }>({ open: false, webhook: null })
   const [deliveries, setDeliveries] = useState<{ open: boolean; hook: WebhookRow | null }>({ open: false, hook: null })
   // Keep the target while the dialog animates out; `open` drives visibility
@@ -54,11 +56,11 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
   return (
     <SettingsSection
       id="webhooks"
-      title="Webhooks"
-      description="Send events to your own services in real time. Failed deliveries are retried with exponential backoff."
+      title={t("webhooks")}
+      description={t("webhooksDescription")}
       action={
         <Button size="sm" onClick={openCreate}>
-          <Plus /> Add endpoint
+          <Plus /> {t("addEndpoint")}
         </Button>
       }
       flush
@@ -67,11 +69,11 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
         <div className="px-5 pb-5">
           <EmptyState
             icon={<Webhook />}
-            title="No webhook endpoints"
+            title={t("noWebhookEndpoints")}
             description="Get notified when conversations are created, assigned or closed, messages arrive, and more."
           >
             <Button size="sm" variant="outline" onClick={openCreate}>
-              <Plus /> Add your first endpoint
+              <Plus /> {t("addFirstEndpoint")}
             </Button>
           </EmptyState>
         </div>
@@ -91,7 +93,7 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="truncate text-sm font-medium">{w.name}</span>
-                    <HealthBadge w={w} />
+                    <HealthBadge w={w} t={t} />
                   </div>
                   <p className="mt-0.5 truncate font-mono text-[12px] text-muted-foreground" title={w.url}>
                     {w.url}
@@ -108,10 +110,10 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
                     <span>
                       {w.lastDeliveredAt ? (
                         <>
-                          Last delivery <LocalTime date={w.lastDeliveredAt} format="relative" titleFormat="datetime" />
+                          {t("lastDelivery")} <LocalTime date={w.lastDeliveredAt} format="relative" titleFormat="datetime" />
                         </>
                       ) : (
-                        "Never delivered"
+                        t("neverDelivered")
                       )}
                     </span>
                     {w.deliveries24h > 0 && (
@@ -124,7 +126,7 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
               </div>
               <div className="flex items-center justify-end gap-2 pl-11 sm:pl-0">
                 <Button variant="ghost" size="sm" onClick={() => setDeliveries({ open: true, hook: w })}>
-                  <History /> Deliveries
+                  <History /> {t("deliveries")}
                 </Button>
                 <Switch
                   checked={w.enabled}
@@ -141,7 +143,7 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => setDialog({ open: true, webhook: w })}>
-                      <Pencil /> Edit
+                      <Pencil /> {t("edit")}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() =>
@@ -150,17 +152,17 @@ export function WebhooksSection({ slug, webhooks, events }: { slug: string; webh
                         })
                       }
                     >
-                      <Send /> Send test event
+                      <Send /> {t("sendTest")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setDeliveries({ open: true, hook: w })}>
-                      <History /> View deliveries
+                      <History /> {t("viewDeliveries")}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setRolling({ open: true, hook: w })}>
-                      <KeyRound /> Roll signing secret
+                      <KeyRound /> {t("rollSecret")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive" onClick={() => setDeleting({ open: true, hook: w })}>
-                      <Trash2 /> Delete
+                      <Trash2 /> {t("delete")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
