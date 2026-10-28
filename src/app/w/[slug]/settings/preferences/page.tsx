@@ -21,6 +21,7 @@ export default async function PreferencesPage({ params }: PageProps<"/w/[slug]/s
           theme: p.theme ?? "system",
           density: p.density ?? "comfortable",
           shortcuts: p.shortcuts ?? "dispatch",
+          locale: ctx.user.locale === "it" ? "it" : "en",
           sendAndArchive: p.sendAndArchive ?? false,
           undoSendSeconds: typeof p.undoSendSeconds === "number" ? p.undoSendSeconds : null,
           loadRemoteImages: p.loadRemoteImages ?? security.remoteImages,

@@ -3,6 +3,8 @@ import { headers } from "next/headers"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Providers } from "@/components/providers"
 import { getAppUrl } from "@/server/env"
+import { getCurrentSession } from "@/server/auth/session"
+import type { Locale } from "@/lib/i18n"
 import "./globals.css"
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] })
@@ -37,10 +39,12 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Per-request CSP nonce from src/proxy.ts (also makes every page dynamic, which nonces require)
   const nonce = (await headers()).get("x-nonce") ?? undefined
+  const session = await getCurrentSession()
+  const locale: Locale = session?.user.locale === "it" ? "it" : "en"
   return (
-    <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={locale} suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full">
-        <Providers nonce={nonce}>{children}</Providers>
+        <Providers nonce={nonce} locale={locale}>{children}</Providers>
       </body>
     </html>
   )

@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { loginWithPasswordAction, requestLoginCodeAction, verifyLoginCodeAction } from "@/app/login/actions"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 const RESEND_COOLDOWN = 30
 
@@ -42,6 +43,7 @@ export function LoginForm({
   const [delivered, setDelivered] = useState(true)
   const [cooldown, setCooldown] = useState(0)
   const [redirecting, setRedirecting] = useState(false)
+  const { t } = useI18n()
   const [pending, startTransition] = useTransition()
   const emailRef = useRef<HTMLInputElement>(null)
   const codeRef = useRef<HTMLInputElement>(null)
@@ -201,18 +203,18 @@ export function LoginForm({
   return (
     <div>
       {notice && <NoticeBanner notice={notice} />}
-      <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">Sign in</div>
+      <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{t("signIn")}</div>
       <h1 className="text-[26px] leading-tight font-semibold tracking-tight text-balance">
-        Welcome back<span className="text-quiet">. Let&apos;s get you to your inbox.</span>
+        {t("welcome")}
       </h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Sign in with your password or use a one-time code sent by email.</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("signInHelp")}</p>
 
       <form
         className="mt-7"
         onSubmit={(e) => { e.preventDefault(); mode === "password" ? loginWithPassword() : requestCode() }}
       >
         <Label htmlFor="login-email" className="mb-1.5 text-[13px]">
-          Work email
+          {t("workEmail")}
         </Label>
         <Input
           ref={emailRef}
@@ -237,7 +239,7 @@ export function LoginForm({
         />
         {mode === "password" && (
           <>
-            <Label htmlFor="login-password" className="mb-1.5 mt-4 text-[13px]">Password</Label>
+            <Label htmlFor="login-password" className="mb-1.5 mt-4 text-[13px]">{t("password")}</Label>
             <Input
               id="login-password"
               type="password"
@@ -253,7 +255,7 @@ export function LoginForm({
         {error && <ErrorText id="login-error">{error}</ErrorText>}
         <Button type="submit" size="lg" className="mt-3 h-10 w-full rounded-md" disabled={pending || !email.trim()}>
           {pending ? <Spinner /> : null}
-          {mode === "password" ? "Sign in" : "Send sign-in code"}
+          {mode === "password" ? t("continue") : "Send sign-in code"}
           {!pending && <ArrowRight />}
         </Button>
       </form>
@@ -263,7 +265,7 @@ export function LoginForm({
         className="mt-4 w-full text-center text-[13px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
         onClick={() => { setMode(mode === "password" ? "magic" : "password"); setError(null) }}
       >
-        {mode === "password" ? "Use a one-time email code instead" : "Use password instead"}
+        {mode === "password" ? t("useCode") : t("usePassword")}
       </button>
 
       {hasProviders && (

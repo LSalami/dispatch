@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTheme } from "next-themes"
-import { Keyboard, Monitor, Moon, Sun } from "lucide-react"
+import { Keyboard, Languages, Monitor, Moon, Sun } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Kbd } from "@/components/ui/kbd"
@@ -19,6 +19,7 @@ export type PreferencesValue = {
   sendAndArchive: boolean
   undoSendSeconds: number | null
   loadRemoteImages: "always" | "ask" | "never"
+  locale: "en" | "it"
 }
 
 function ThemePreview({ mode }: { mode: "light" | "dark" | "system" }) {
@@ -103,6 +104,18 @@ export function PreferencesForm({
             ]}
           />
         </div>
+      </SettingsSection>
+
+      <SettingsSection title="Language" description="Choose the language used by Dispatch.">
+        <OptionCards
+          label="Interface language"
+          value={form.locale}
+          onChange={(v) => set("locale", v)}
+          options={[
+            { value: "en", label: "English", icon: <Languages /> },
+            { value: "it", label: "Italiano", icon: <Languages /> },
+          ]}
+        />
       </SettingsSection>
 
       <SettingsSection title="Sending & reading">
