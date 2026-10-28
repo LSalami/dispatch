@@ -4,17 +4,19 @@ import { ChartCard, DataTable } from "@/components/analytics/chart-card"
 import { ChartEmpty } from "@/components/analytics/trend-charts"
 import { formatCount } from "@/components/analytics/format"
 import type { LabelStat } from "@/server/workspace/queries/analytics"
+import { useI18n } from "@/lib/i18n"
 
 /**
  * Horizontal bars, one series (slot color); the label's own color is shown
  * as a dot beside its name for identity.
  */
 export function TopLabels({ labels }: { labels: LabelStat[] }) {
+  const { t } = useI18n()
   const max = Math.max(1, ...labels.map((l) => l.count))
   return (
     <ChartCard
-      title="Top labels"
-      description="Conversations per shared label, created or active in this period."
+      title={t("topLabels")}
+      description={t("topLabelsDescription")}
       table={
         <DataTable
           caption="Top labels"
@@ -27,7 +29,7 @@ export function TopLabels({ labels }: { labels: LabelStat[] }) {
       }
     >
       {labels.length === 0 ? (
-        <ChartEmpty>No labeled conversations in this period.</ChartEmpty>
+        <ChartEmpty>{t("noLabeledConversations")}</ChartEmpty>
       ) : (
         <ul className="flex flex-col gap-2.5 pt-1">
           {labels.map((l) => {

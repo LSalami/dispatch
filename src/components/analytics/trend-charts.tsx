@@ -7,6 +7,7 @@ import { ChartCard, DataTable, Legend } from "@/components/analytics/chart-card"
 import { formatBucket, formatCount, formatDuration } from "@/components/analytics/format"
 import { responseConfig, volumeConfig } from "@/components/analytics/palette"
 import type { SeriesPoint } from "@/server/workspace/queries/analytics"
+import { useI18n } from "@/lib/i18n"
 
 type Granularity = "day" | "week"
 
@@ -17,16 +18,17 @@ const axisProps = {
 } as const
 
 export function VolumeChart({ series, granularity }: { series: SeriesPoint[]; granularity: Granularity }) {
+  const { t } = useI18n()
   const total = series.reduce((a, p) => a + p.received + p.replied, 0)
   return (
     <ChartCard
-      title="Conversation volume"
+      title={t("conversationVolume")}
       description={`New conversations received vs replies sent, per ${granularity}.`}
       legend={
         <Legend
           items={[
-            { label: "Received", color: "var(--viz-in)" },
-            { label: "Replies sent", color: "var(--viz-out)" },
+            { label: t("received"), color: "var(--viz-in)" },
+            { label: t("repliesSent"), color: "var(--viz-out)" },
           ]}
         />
       }
@@ -47,7 +49,7 @@ export function VolumeChart({ series, granularity }: { series: SeriesPoint[]; gr
       }
     >
       {total === 0 ? (
-        <ChartEmpty>No conversations or replies in this period.</ChartEmpty>
+        <ChartEmpty>{t("noConversationReplies")}</ChartEmpty>
       ) : (
         <ChartContainer config={volumeConfig} className="aspect-auto h-[260px] w-full">
           <LineChart data={series} margin={{ top: 8, right: 12, bottom: 0, left: 0 }} accessibilityLayer>
@@ -99,6 +101,7 @@ function durationUnit(maxSeconds: number): { div: number; suffix: string } {
 }
 
 export function ResponseTimeChart({ series, granularity }: { series: SeriesPoint[]; granularity: Granularity }) {
+  const { t } = useI18n()
   const values = series.map((p) => p.medianFirstResponse).filter((v): v is number => v !== null)
   const unit = durationUnit(values.length ? Math.max(...values) : 0)
   const data = useMemo(
@@ -112,7 +115,7 @@ export function ResponseTimeChart({ series, granularity }: { series: SeriesPoint
   )
   return (
     <ChartCard
-      title="First response time"
+      title={t("firstResponseTime")}
       description={`Median time to first reply for conversations started each ${granularity}. Lower is better.`}
       table={
         <DataTable
@@ -129,7 +132,7 @@ export function ResponseTimeChart({ series, granularity }: { series: SeriesPoint
       }
     >
       {values.length === 0 ? (
-        <ChartEmpty>No answered conversations in this period.</ChartEmpty>
+        <ChartEmpty>{t("noAnsweredConversations")}</ChartEmpty>
       ) : (
         <ChartContainer config={responseConfig} className="aspect-auto h-[220px] w-full">
           <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }} accessibilityLayer>

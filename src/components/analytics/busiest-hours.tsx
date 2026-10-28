@@ -6,10 +6,12 @@ import { ChartEmpty } from "@/components/analytics/trend-charts"
 import { formatHour, WEEKDAYS } from "@/components/analytics/format"
 import { HEAT_STEPS, heatColor } from "@/components/analytics/palette"
 import type { HeatmapCell } from "@/server/workspace/queries/analytics"
+import { useI18n } from "@/lib/i18n"
 
 const HOURS = Array.from({ length: 24 }, (_, h) => h)
 
 export function BusiestHours({ cells, timezone }: { cells: HeatmapCell[]; timezone: string }) {
+  const { t } = useI18n()
   const { grid, max, total, peak } = useMemo(() => {
     const g = Array.from({ length: 7 }, () => Array<number>(24).fill(0))
     let mx = 0
@@ -35,11 +37,11 @@ export function BusiestHours({ cells, timezone }: { cells: HeatmapCell[]; timezo
 
   return (
     <ChartCard
-      title="Busiest hours"
+      title={t("busiestHours")}
       description={`Incoming emails by weekday and hour (${timezone.replace(/_/g, " ")}).`}
       table={
         <DataTable
-          caption="Incoming emails by weekday and hour"
+          caption={t("incomingByWeekday")}
           columns={[{ key: "day", label: "Day" }, ...HOURS.map((h) => ({ key: String(h), label: String(h).padStart(2, "0"), align: "right" as const }))]}
           rows={grid.map((row, d) => ({
             day: WEEKDAYS[d]!.slice(0, 3),
@@ -49,7 +51,7 @@ export function BusiestHours({ cells, timezone }: { cells: HeatmapCell[]; timezo
       }
     >
       {total === 0 ? (
-        <ChartEmpty>No incoming emails in this period.</ChartEmpty>
+        <ChartEmpty>{t("noIncomingEmails")}</ChartEmpty>
       ) : (
         <div className="flex flex-col gap-3">
           <div ref={wrapRef} className="relative -mx-1 overflow-x-auto px-1 pb-1" onPointerLeave={() => setHover(null)}>
