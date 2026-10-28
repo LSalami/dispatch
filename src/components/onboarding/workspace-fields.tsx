@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 export type SlugCheckResult = { slug: string; available: boolean; reason?: "short" | "reserved" | "taken"; suggestion?: string }
 type CheckFn = (input: { slug: string }) => Promise<{ ok: true; data: SlugCheckResult } | { ok: false; error: string }>
@@ -44,6 +45,7 @@ export function WorkspaceFields({
   autoFocus?: boolean
   error?: string | null
 }) {
+  const { t } = useI18n()
   const [checked, setChecked] = useState<{ slug: string; result: SlugCheckResult | null } | null>(null)
   const onStatusRef = useRef(onStatus)
   useEffect(() => {
@@ -88,7 +90,7 @@ export function WorkspaceFields({
           value={value.name}
           autoFocus={autoFocus}
           maxLength={80}
-          placeholder="Acme Inc."
+          placeholder={t("workspaceNamePlaceholder")}
           className="h-10 bg-card"
           aria-invalid={Boolean(error)}
           onChange={(e) => {
@@ -120,7 +122,7 @@ export function WorkspaceFields({
             autoCapitalize="none"
             aria-describedby="ws-slug-status"
             aria-invalid={status.state === "unavailable"}
-            placeholder="acme"
+            placeholder={t("slugPlaceholder")}
             className="h-full min-w-0 flex-1 bg-transparent px-2.5 font-mono text-[13px] outline-none placeholder:text-muted-foreground"
             onChange={(e) =>
               onChange({

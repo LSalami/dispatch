@@ -226,7 +226,7 @@ export function LoginForm({
           spellCheck={false}
           required
           autoFocus
-          placeholder="you@company.com"
+          placeholder={t("emailPlaceholder")}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value)

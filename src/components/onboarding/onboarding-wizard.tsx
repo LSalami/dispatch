@@ -202,7 +202,7 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
                 id="invite-emails"
                 value={emails}
                 onChange={setEmails}
-                placeholder="maya@company.com, leo@company.com"
+                placeholder={t("inviteEmailsPlaceholder")}
                 normalize={(v) => v.trim().toLowerCase()}
                 validate={(v) => (EMAIL_RE.test(v) ? null : `“${v}” is not a valid email address`)}
                 className="min-h-10 bg-card"

@@ -39,6 +39,7 @@ import {
   saveInstanceAction,
 } from "@/app/setup/actions"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 const STEPS: RailStep[] = [
   { id: "welcome", label: "Welcome", hint: "System check" },
@@ -65,6 +66,7 @@ export type SetupWizardProps = {
 type ActionRes<T> = { ok: true; data: T } | { ok: false; error: string; fieldErrors?: Record<string, string> }
 
 export function SetupWizard(props: SetupWizardProps) {
+  const { t } = useI18n()
   const [step, setStep] = useState(props.initialStep)
   const [direction, setDirection] = useState(1)
   const [owner, setOwner] = useState(props.owner)
@@ -245,7 +247,7 @@ export function SetupWizard(props: SetupWizardProps) {
                       maxLength={80}
                       value={ownerForm.name}
                       onChange={(e) => setOwnerForm((f) => ({ ...f, name: e.target.value }))}
-                      placeholder="Ada Lovelace"
+                      placeholder={t("ownerNamePlaceholder")}
                       className="h-10 bg-card"
                       aria-invalid={Boolean(err("name"))}
                     />
@@ -261,7 +263,7 @@ export function SetupWizard(props: SetupWizardProps) {
                       minLength={12}
                       value={ownerForm.password}
                       onChange={(e) => setOwnerForm((f) => ({ ...f, password: e.target.value }))}
-                      placeholder="At least 12 characters"
+                      placeholder={t("passwordPlaceholder")}
                       className="h-10 bg-card"
                       aria-invalid={Boolean(err("password"))}
                     />
@@ -278,7 +280,7 @@ export function SetupWizard(props: SetupWizardProps) {
                       required
                       value={ownerForm.email}
                       onChange={(e) => setOwnerForm((f) => ({ ...f, email: e.target.value }))}
-                      placeholder="you@company.com"
+                      placeholder={t("ownerEmailPlaceholder")}
                       className="h-10 bg-card"
                       aria-invalid={Boolean(err("email"))}
                     />
@@ -389,7 +391,7 @@ export function SetupWizard(props: SetupWizardProps) {
                       id="signup-domains"
                       value={auth.allowedSignupDomains}
                       onChange={(allowedSignupDomains) => setAuth((a) => ({ ...a, allowedSignupDomains }))}
-                      placeholder="acme.com, acme.de"
+                      placeholder={t("domainsPlaceholder")}
                       normalize={(v) => v.trim().toLowerCase().replace(/^@/, "")}
                       validate={(v) => (DOMAIN_RE.test(v) ? null : `“${v}” is not a valid domain`)}
                       className="bg-card"
