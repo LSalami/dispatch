@@ -14,6 +14,7 @@ import { parseEmailList } from "@/components/settings/members/parse-emails"
 import { inviteMembersAction } from "@/server/workspace/actions/members"
 import type { MembersPageData } from "@/server/workspace/queries/members"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 type InviteResult = {
   invited: { id: string; email: string; url: string; delivered: boolean }[]
@@ -36,6 +37,7 @@ export function InviteDialog({
   defaultRoleId: string | null
   emailDelivery: boolean
 }) {
+  const { t } = useI18n()
   const grantable = roles.filter((r) => r.grantable)
   const initialRole =
     grantable.find((r) => r.id === defaultRoleId)?.id ?? grantable.find((r) => r.key === "member")?.id ?? grantable[0]?.id ?? ""
@@ -191,26 +193,32 @@ export function InviteDialog({
               </DialogTitle>
               <DialogDescription>
                 {sent.length > 0 && `${sent.length} ${sent.length === 1 ? "email" : "emails"} sent. `}
-                {unsent.length > 0 && "Share these links with the people you invited — each link works once and expires in 14 days."}
+                {result.invited.length > 0 && t("invitationLinkHelp")}
               </DialogDescription>
             </DialogHeader>
 
-            {unsent.length > 0 && (
+            {result.invited.length > 0 && (
               <div className="flex flex-col gap-2">
-                {unsent.map((i) => (
+                <div className="text-[13px] font-medium">{t("invitationLinks")}</div>
+                {result.invited.map((i) => (
                   <div key={i.id} className="flex flex-col gap-1">
-                    <span className="text-[13px] font-medium">{i.email}</span>
+                    <span className="flex items-center justify-between gap-2 text-[13px] font-medium">
+                      <span>{i.email}</span>
+                      <span className={cn("text-xs font-normal", i.delivered ? "text-success" : "text-amber-600 dark:text-amber-300")}>
+                        {i.delivered ? t("invitationSentLabel") : t("invitationShareLabel")}
+                      </span>
+                    </span>
                     <CopyField value={i.url} />
                   </div>
                 ))}
-                {unsent.length > 1 && (
+                {result.invited.length > 1 && (
                   <Button
                     variant="outline"
                     size="sm"
                     className="self-start"
-                    onClick={() => copyToClipboard(unsent.map((i) => `${i.email}: ${i.url}`).join("\n"), "All links copied")}
+                    onClick={() => copyToClipboard(result.invited.map((i) => `${i.email}: ${i.url}`).join("\n"), t("copyAllInvitationLinks"))}
                   >
-                    Copy all links
+                    {t("copyAllInvitationLinks")}
                   </Button>
                 )}
               </div>
