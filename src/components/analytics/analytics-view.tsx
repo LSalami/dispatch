@@ -14,6 +14,7 @@ import { UserAvatar } from "@/components/app/user-avatar"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { addDaysYmd, formatRangeLabel, parseYmd, toYmd } from "@/components/analytics/format"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 
 export type AnalyticsFilterState = {
   range: "7" | "30" | "90" | "custom"
@@ -61,6 +62,7 @@ export function AnalyticsView({
   today: string
   children: React.ReactNode
 }) {
+  const { t } = useI18n()
   const router = useRouter()
   const pathname = usePathname()
   const [pending, startTransition] = useTransition()
@@ -103,7 +105,7 @@ export function AnalyticsView({
 
   return (
     <>
-      <div className="mb-5 flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center" role="search" aria-label="Report filters">
+      <div className="mb-5 flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:items-center" role="search" aria-label={t("reportFilters")}>
         <div className="flex flex-wrap items-center gap-2">
           <ToggleGroup
             type="single"
@@ -113,7 +115,7 @@ export function AnalyticsView({
             onValueChange={(v) => {
               if (v && v !== "custom") navigate({ range: v as AnalyticsFilterState["range"] })
             }}
-            aria-label="Date range"
+            aria-label={t("dateRange")}
             className="bg-card"
           >
             {(["7", "30", "90"] as const).map((r) => (
@@ -132,16 +134,16 @@ export function AnalyticsView({
           <span className="text-[13px] text-muted-foreground tabular-nums">
             {formatRangeLabel(filters.from, addDaysYmd(filters.to, 1))}
           </span>
-          {pending && <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-label="Updating" />}
+          {pending && <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-label={t("updating")} />}
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:ml-auto lg:flex lg:items-center">
           <Combobox
             options={inboxOptions}
             value={filters.inbox}
             onChange={(v) => navigate({ inbox: v })}
-            placeholder="All inboxes"
-            searchPlaceholder="Search inboxes…"
-            emptyText="No shared inboxes."
+            placeholder={t("allInboxes")}
+            searchPlaceholder={t("searchInboxes")}
+            emptyText={t("noSharedInboxes")}
             clearable
             className="bg-card lg:w-44"
           />
@@ -149,9 +151,9 @@ export function AnalyticsView({
             options={teamOptions}
             value={filters.team}
             onChange={(v) => navigate({ team: v })}
-            placeholder="All teams"
-            searchPlaceholder="Search teams…"
-            emptyText="No teams yet."
+            placeholder={t("allTeams")}
+            searchPlaceholder={t("searchTeams")}
+            emptyText={t("noTeamsYet")}
             clearable
             className="bg-card lg:w-40"
           />
@@ -159,7 +161,7 @@ export function AnalyticsView({
             options={memberOptions}
             value={filters.user}
             onChange={(v) => navigate({ user: v })}
-            placeholder="All teammates"
+            placeholder={t("allTeammates")}
             searchPlaceholder="Search teammates…"
             clearable
             className="bg-card lg:w-48"
@@ -172,7 +174,7 @@ export function AnalyticsView({
             className="self-start text-muted-foreground lg:self-auto"
             onClick={() => navigate({ range: DEFAULT_RANGE, inbox: null, team: null, user: null })}
           >
-            <RotateCcw /> Reset
+            <RotateCcw /> {t("reset")}
           </Button>
         )}
       </div>
