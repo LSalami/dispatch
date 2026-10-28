@@ -346,10 +346,10 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                     <span className="text-xs text-muted-foreground">
                       {m.lastSeenAt ? (
                         <>
-                          Active <LocalTime date={m.lastSeenAt} format="relative" />
+                          {t("invLastActive")} <LocalTime date={m.lastSeenAt} format="relative" />
                         </>
                       ) : (
-                        {t("memNeverSignedIn")}
+                        t("memNeverSignedIn")
                       )}
                     </span>
                   </div>
