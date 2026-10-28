@@ -4,6 +4,7 @@ import { useState } from "react"
 import { KeyRound, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { useAdminAction } from "@/components/admin/client"
 import { updateUserCredentialsAction } from "@/app/admin/users/actions"
@@ -31,7 +32,7 @@ export function CredentialsControl({ id, email }: { id: string; email: string })
       </div>
       <div className="grid gap-1.5">
         <Label htmlFor="admin-user-password">{t("setNewPassword")}</Label>
-        <Input id="admin-user-password" type="password" autoComplete="new-password" minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("keepPasswordPlaceholder")} />
+        <PasswordInput id="admin-user-password" autoComplete="new-password" minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("keepPasswordPlaceholder")} showLabel={t("showPassword")} hideLabel={t("hidePassword")} />
         <p className="text-xs text-muted-foreground">{t("passwordSessionHelp")}</p>
       </div>
       <Button type="submit" disabled={action.pending || (nextEmail === email && !password)} className="w-fit">

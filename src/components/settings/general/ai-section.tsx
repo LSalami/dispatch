@@ -4,6 +4,7 @@ import { useState } from "react"
 import { CheckCircle2, KeyRound, Loader2, PowerOff, Sparkles, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FormField, SectionFooter, SettingsSection, StatusBadge } from "@/components/settings/settings-ui"
 import { OptionCards } from "@/components/settings/personal/option-cards"
@@ -158,7 +159,7 @@ export function AiSection({
               </Select>
             </FormField>
             <FormField label="Model" htmlFor="ai-model" optional description={`Default: ${DEFAULT_MODEL[form.provider]}`}>
-              <Input
+              <PasswordInput
                 id="ai-model"
                 spellCheck={false}
                 placeholder={DEFAULT_MODEL[form.provider]}
@@ -191,9 +192,8 @@ export function AiSection({
                 ) : undefined
               }
             >
-              <Input
+              <PasswordInput
                 id="ai-key"
-                type="password"
                 autoComplete="off"
                 spellCheck={false}
                 placeholder={hasStoredKey ? "••••••••••••" : form.provider === "anthropic" ? "sk-ant-…" : "sk-…"}

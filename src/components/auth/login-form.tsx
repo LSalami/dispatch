@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { ArrowLeft, ArrowRight, CheckCircle2, Info, MailCheck, Terminal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
@@ -239,10 +240,11 @@ export function LoginForm({
         {mode === "password" && (
           <>
             <Label htmlFor="login-password" className="mb-1.5 mt-4 text-[13px]">{t("password")}</Label>
-            <Input
+            <PasswordInput
               id="login-password"
-              type="password"
               name="password"
+              showLabel={t("showPassword")}
+              hideLabel={t("hidePassword")}
               autoComplete="current-password"
               required
               value={password}

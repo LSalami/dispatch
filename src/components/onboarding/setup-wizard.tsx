@@ -22,6 +22,7 @@ import {
 import { Logo } from "@/components/brand/logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Spinner } from "@/components/ui/spinner"
@@ -221,7 +222,7 @@ export function SetupWizard(props: SetupWizardProps) {
                       <code className="rounded bg-muted px-1 py-0.5 font-mono text-[12px] text-foreground">docker compose logs app</code> or
                       open the app&apos;s Logs tab in Coolify and look for &ldquo;Dispatch first-run setup code&rdquo;.
                     </p>
-                    <Input
+                    <PasswordInput
                       id="setup-code"
                       autoFocus
                       required
@@ -255,15 +256,16 @@ export function SetupWizard(props: SetupWizardProps) {
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="owner-password" className="text-[13px]">Password</Label>
-                    <Input
+                    <PasswordInput
                       id="owner-password"
-                      type="password"
                       autoComplete="new-password"
                       required
                       minLength={12}
                       value={ownerForm.password}
                       onChange={(e) => setOwnerForm((f) => ({ ...f, password: e.target.value }))}
                       placeholder={t("passwordPlaceholder")}
+                      showLabel={t("showPassword")}
+                      hideLabel={t("hidePassword")}
                       className="h-10 bg-card"
                       aria-invalid={Boolean(err("password"))}
                     />
