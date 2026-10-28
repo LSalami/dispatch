@@ -43,7 +43,7 @@ export function LoginForm({
   const [delivered, setDelivered] = useState(true)
   const [cooldown, setCooldown] = useState(0)
   const [redirecting, setRedirecting] = useState(false)
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [pending, startTransition] = useTransition()
   const emailRef = useRef<HTMLInputElement>(null)
   const codeRef = useRef<HTMLInputElement>(null)
@@ -109,18 +109,17 @@ export function LoginForm({
           <MailCheck className="size-5 text-brand" />
         </div>
         <h1 className="text-[26px] leading-tight font-semibold tracking-tight">
-          Check your email<span className="text-quiet">.</span>
+          {t("checkEmail")}<span className="text-quiet">.</span>
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          We sent an email to <span className="font-medium break-words text-foreground">{email}</span>. Enter the 6-digit code from
-          it below or click the sign-in link.
+          {locale === "it" ? "Abbiamo inviato un’email a" : "We sent an email to"} <span className="font-medium break-words text-foreground">{email}</span>. {t("codeHelp")}
         </p>
 
         {!delivered && (
           <div className="mt-5 flex gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-[13px] leading-relaxed text-amber-900 dark:text-amber-200">
             <Terminal className="mt-0.5 size-4 shrink-0" />
             <p>
-              Email delivery isn&apos;t configured yet. Your sign-in link and code were printed to the server logs (
+              {t("emailNotConfigured")} (
               <code className="font-mono text-[12px]">docker compose logs app</code>).
             </p>
           </div>
@@ -166,7 +165,7 @@ export function LoginForm({
 
           <Button type="submit" size="lg" className="mt-4 h-10 w-full rounded-md" disabled={code.length !== 6 || pending || redirecting}>
             {pending || redirecting ? <Spinner /> : null}
-            {redirecting ? "Signing you in…" : "Sign in"}
+            {redirecting ? t("signingIn") : t("signIn")}
           </Button>
         </form>
 
@@ -181,7 +180,7 @@ export function LoginForm({
               setTimeout(() => emailRef.current?.focus(), 0)
             }}
           >
-            <ArrowLeft className="size-3.5" /> Use a different email
+            <ArrowLeft className="size-3.5" /> {t("useDifferentEmail")}
           </button>
           <button
             type="button"
@@ -189,7 +188,7 @@ export function LoginForm({
             className="rounded-sm font-medium outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:font-normal disabled:text-muted-foreground disabled:no-underline"
             onClick={() => requestCode({ resend: true })}
           >
-            {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
+            {cooldown > 0 ? `${t("resendIn")} ${cooldown}s` : t("resendCode")}
           </button>
         </div>
       </div>
@@ -255,7 +254,7 @@ export function LoginForm({
         {error && <ErrorText id="login-error">{error}</ErrorText>}
         <Button type="submit" size="lg" className="mt-3 h-10 w-full rounded-md" disabled={pending || !email.trim()}>
           {pending ? <Spinner /> : null}
-          {mode === "password" ? t("continue") : "Send sign-in code"}
+          {mode === "password" ? t("continue") : t("sendCode")}
           {!pending && <ArrowRight />}
         </Button>
       </form>
@@ -279,14 +278,14 @@ export function LoginForm({
             {providers?.google && (
               <Button asChild variant="outline" size="lg" className="h-10 rounded-md bg-card">
                 <a href={oauthHref("google")}>
-                  <GoogleIcon /> Continue with Google
+                  <GoogleIcon /> {t("continueWithGoogle")}
                 </a>
               </Button>
             )}
             {providers?.microsoft && (
               <Button asChild variant="outline" size="lg" className="h-10 rounded-md bg-card">
                 <a href={oauthHref("microsoft")}>
-                  <MicrosoftIcon /> Continue with Microsoft
+                  <MicrosoftIcon /> {t("continueWithMicrosoft")}
                 </a>
               </Button>
             )}
@@ -298,7 +297,7 @@ export function LoginForm({
         <p className="mt-6 flex gap-2 text-xs leading-relaxed text-muted-foreground">
           <Info className="mt-px size-3.5 shrink-0" />
           <span>
-            Email delivery isn&apos;t configured yet. Your sign-in link and code will be printed to the server logs (
+            {t("emailNotConfigured")} (
             <code className="font-mono">docker compose logs app</code>).
           </span>
         </p>
