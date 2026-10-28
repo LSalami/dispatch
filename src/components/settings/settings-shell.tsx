@@ -38,7 +38,7 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
             className="group flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[13px] text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             <ArrowLeft className="size-3.5 transition-transform group-hover:-translate-x-0.5" />
-            Back to inbox
+            {t("backToInbox")}
           </Link>
           <WorkspaceSwitcher className="mt-1" />
         </div>
