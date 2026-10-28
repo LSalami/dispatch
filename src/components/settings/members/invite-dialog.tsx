@@ -102,7 +102,7 @@ export function InviteDialog({
                 label={t("inviteEmails")}
                 htmlFor="invite-emails"
                 error={fieldErrors.emails ?? (parsed.invalid.length ? `Not valid: ${parsed.invalid.slice(0, 3).join(", ")}${parsed.invalid.length > 3 ? "…" : ""}` : undefined)}
-                description="Separate multiple addresses with commas, spaces or new lines."
+                description={t("invSeparateAddresses")}
               >
                 <Textarea
                   id="invite-emails"
@@ -116,14 +116,14 @@ export function InviteDialog({
                 />
               </FormField>
               {parsed.valid.length > 0 && (
-                <div className="-mt-2 flex flex-wrap gap-1" aria-label="Recipients">
+                  <div className="-mt-2 flex flex-wrap gap-1" aria-label={t("invRecipients")}>
                   {parsed.valid.slice(0, 12).map((e) => (
                     <span key={e} className="rounded-md border bg-surface px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground">
                       {e}
                     </span>
                   ))}
                   {parsed.valid.length > 12 && (
-                    <span className="px-1 py-0.5 text-[11px] text-muted-foreground">+{parsed.valid.length - 12} more</span>
+                    <span className="px-1 py-0.5 text-[11px] text-muted-foreground">+{parsed.valid.length - 12} {t("invMore")}</span>
                   )}
                 </div>
               )}
@@ -145,7 +145,7 @@ export function InviteDialog({
               </FormField>
 
               {teams.length > 0 && (
-                <FormField label={t("inviteTeams")} optional htmlFor="invite-teams" description="They’ll join these teams when they accept.">
+                <FormField label={t("inviteTeams")} optional htmlFor="invite-teams" description={t("invTeamsJoin")}>
                   <MultiCombobox
                     id="invite-teams"
                     options={teams.map((t) => ({ value: t.id, label: t.name, icon: <ColorDot color={t.color} className="size-2" /> }))}
@@ -161,8 +161,7 @@ export function InviteDialog({
                 <div className="flex gap-2 rounded-lg border bg-surface/60 p-3 text-[13px] text-muted-foreground">
                   <Info className="mt-0.5 size-4 shrink-0" />
                   <p>
-                    Email delivery isn&apos;t configured on this instance, so no emails are sent. Copy the links after creating
-                    the invitations.
+                    {t("invEmailNotConfigured")}
                   </p>
                 </div>
               )}
@@ -175,7 +174,7 @@ export function InviteDialog({
               <Button onClick={submit} disabled={pending || parsed.valid.length === 0 || !roleId}>
                 {pending ? <Loader2 className="animate-spin" /> : <MailPlus />}
                 {parsed.valid.length > 1
-                    ? `${emailDelivery ? "Send" : "Create"} ${parsed.valid.length} invitations`
+                    ? `${emailDelivery ? t("invSendMany") : t("invCreateMany")} ${parsed.valid.length} ${t("invInvitations")}`
                   : emailDelivery
                     ? t("inviteSend")
                     : t("inviteCreate")}
