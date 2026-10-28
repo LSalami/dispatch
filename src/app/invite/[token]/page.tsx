@@ -121,7 +121,7 @@ export default async function InvitePage({ params }: PageProps<"/invite/[token]"
       <CenteredAuthLayout productName={productName} homeHref={homeHref} banner={banner}>
         <AuthCard>
           <div className="mb-6 flex size-11 items-center justify-center rounded-lg border border-border bg-surface">
-            <copy.icon className="size-5 text-muted-foreground" />
+            <stateCopy.icon className="size-5 text-muted-foreground" />
           </div>
           <AuthHeading eyebrow={copy.invitation} title={stateCopy.title} description={stateCopy.text} />
           <Button asChild size="lg" variant={session ? "outline" : "default"} className="h-10 w-full rounded-md">
@@ -136,7 +136,7 @@ export default async function InvitePage({ params }: PageProps<"/invite/[token]"
 
   const { inv, org, role, inviter } = row
   const inviterName = inviter?.name || inviter?.email || "A teammate"
-  const translatedRole = italian ? ({ owner: "Proprietario", admin: "Amministratore", member: "Membro", guest: "Ospite" }[role.key] ?? role.name) : role.name
+  const translatedRole = italian ? ({ owner: "Proprietario", admin: "Amministratore", member: "Membro", guest: "Ospite" }[role.key ?? ""] ?? role.name) : role.name
   const signedInAs = session?.user.email.toLowerCase()
   const matches = signedInAs === inv.email.toLowerCase()
 
