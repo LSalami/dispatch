@@ -13,6 +13,7 @@ import { InviteActions } from "@/components/auth/invite-actions"
 import { UserAvatar } from "@/components/app/user-avatar"
 import { Button } from "@/components/ui/button"
 import { LocalTime } from "@/components/app/local-time"
+import { InvitePasswordForm } from "@/components/auth/invite-password-form"
 
 export const metadata: Metadata = {
   title: "Invitation",
@@ -118,13 +119,9 @@ export default async function InvitePage({ params }: PageProps<"/invite/[token]"
 
         {!session ? (
           <>
-            <Button asChild size="lg" className="h-10 w-full rounded-md">
-              <Link href={`/login?next=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(inv.email)}`}>
-                Sign in to accept
-              </Link>
-            </Button>
+            <InvitePasswordForm token={token} email={inv.email} />
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              No password needed — we&apos;ll email a sign-in code to {inv.email}.
+              Already have a password? <Link className="underline underline-offset-2" href={`/login?next=${encodeURIComponent(`/invite/${token}`)}&email=${encodeURIComponent(inv.email)}`}>Sign in instead</Link>.
             </p>
           </>
         ) : matches ? (
