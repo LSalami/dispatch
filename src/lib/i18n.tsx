@@ -64,3 +64,20 @@ export function I18nProvider({ locale, children }: { locale: Locale; children: R
 export function useI18n() {
   return useContext(I18nContext)
 }
+
+const italianErrors: Record<string, string> = {
+  "The email or password is incorrect.": "L’email o la password non sono corrette.",
+  "Invalid email address": "Indirizzo email non valido.",
+  "Something went wrong": "Qualcosa è andato storto.",
+  "Could not reach the server. Please try again.": "Impossibile raggiungere il server. Riprova.",
+  "Could not reach the server. Try again.": "Impossibile raggiungere il server. Riprova.",
+  "Please fix the highlighted fields": "Correggi i campi evidenziati.",
+  "Import failed": "Importazione non riuscita.",
+  "Couldn’t save the contact": "Impossibile salvare il contatto.",
+  "Couldn’t copy to the clipboard": "Impossibile copiare negli appunti.",
+  "Couldn't copy to clipboard": "Impossibile copiare negli appunti.",
+}
+
+export function localizeError(message: string, locale: Locale) {
+  return locale === "it" ? (italianErrors[message] ?? message) : message
+}

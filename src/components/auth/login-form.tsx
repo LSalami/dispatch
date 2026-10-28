@@ -10,7 +10,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { loginWithPasswordAction, requestLoginCodeAction, verifyLoginCodeAction } from "@/app/login/actions"
 import { cn } from "@/lib/utils"
-import { useI18n } from "@/lib/i18n"
+import { localizeError, useI18n } from "@/lib/i18n"
 
 const RESEND_COOLDOWN = 30
 
@@ -60,7 +60,7 @@ export function LoginForm({
     startTransition(async () => {
       const res = await requestLoginCodeAction({ email, next })
       if (!res.ok) {
-        setError(res.error)
+        setError(localizeError(res.error, locale))
         return
       }
       setEmail(res.data.email)
@@ -76,7 +76,7 @@ export function LoginForm({
     setError(null)
     startTransition(async () => {
       const res = await loginWithPasswordAction({ email, password, next })
-      if (res && !res.ok) setError(res.error)
+      if (res && !res.ok) setError(localizeError(res.error, locale))
       else setRedirecting(true)
     })
   }
@@ -88,7 +88,7 @@ export function LoginForm({
       // On success the action redirects (client-side navigation) and never returns a result
       const res = await verifyLoginCodeAction({ email, code: value, next })
       if (res && !res.ok) {
-        setError(res.error)
+        setError(localizeError(res.error, locale))
         setCode("")
         return
       }

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Spinner } from "@/components/ui/spinner"
 import { cn } from "@/lib/utils"
+import { localizeError, useI18n } from "@/lib/i18n"
 
 export type ActionResultLike<T = unknown> = { ok: true; data: T } | { ok: false; error: string; fieldErrors?: Record<string, string> }
 
@@ -29,6 +30,7 @@ export type ActionResultLike<T = unknown> = { ok: true; data: T } | { ok: false;
  * success toast and a router refresh so server components re-render.
  */
 export function useAdminAction() {
+  const { locale } = useI18n()
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   function run<T>(
@@ -39,7 +41,7 @@ export function useAdminAction() {
       startTransition(async () => {
         try {
           const res = await fn()
-          if (!res.ok) toast.error(res.error)
+          if (!res.ok) toast.error(localizeError(res.error, locale))
           else {
             const msg = typeof opts.success === "function" ? opts.success(res.data) : opts.success
             if (msg) toast.success(msg)
@@ -49,7 +51,7 @@ export function useAdminAction() {
           resolve(res)
         } catch (err) {
           const message = err instanceof Error ? err.message : "Something went wrong"
-          toast.error(message)
+          toast.error(localizeError(message, locale))
           resolve({ ok: false, error: message })
         }
       })
