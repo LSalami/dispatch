@@ -62,7 +62,7 @@ export function useAdminAction() {
 
 export function CopyButton({
   value,
-  label = "Copy",
+  label,
   className,
   size = "icon-sm",
 }: {
@@ -71,6 +71,8 @@ export function CopyButton({
   className?: string
   size?: "icon-sm" | "icon-xs" | "sm"
 }) {
+  const { t } = useI18n()
+  const buttonLabel = label ?? t("copy")
   const [copied, setCopied] = useState(false)
   return (
     <Button
@@ -78,19 +80,19 @@ export function CopyButton({
       variant="ghost"
       size={size}
       className={className}
-      aria-label={label}
+      aria-label={buttonLabel}
       onClick={async () => {
         try {
           await navigator.clipboard.writeText(value)
           setCopied(true)
           setTimeout(() => setCopied(false), 1500)
         } catch {
-          toast.error("Couldn't copy to clipboard")
+          toast.error(t("couldNotCopy"))
         }
       }}
     >
       {copied ? <Check className="text-brand" /> : <Copy />}
-      {size === "sm" && (copied ? "Copied" : label)}
+      {size === "sm" && (copied ? t("copied") : buttonLabel)}
     </Button>
   )
 }
@@ -134,6 +136,7 @@ export function SearchParamInput({
   placeholder?: string
   className?: string
 }) {
+  const { t } = useI18n()
   const params = useSearchParams()
   const update = useParamUpdater()
   const initial = params.get(param) ?? ""
@@ -163,7 +166,7 @@ export function SearchParamInput({
       {value && (
         <button
           type="button"
-          aria-label="Clear search"
+          aria-label={t("adminClearSearch")}
           className="absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
           onClick={() => {
             setValue("")
@@ -189,6 +192,7 @@ export function FilterSelect({
   label: string
   className?: string
 }) {
+  const { t } = useI18n()
   const params = useSearchParams()
   const update = useParamUpdater()
   const value = params.get(param) ?? "all"
@@ -198,7 +202,7 @@ export function FilterSelect({
         <SelectValue placeholder={label} />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="all">{label}: all</SelectItem>
+        <SelectItem value="all">{label}: {t("allOption")}</SelectItem>
         {options.map((o) => (
           <SelectItem key={o.value} value={o.value}>
             {o.label}
@@ -211,6 +215,7 @@ export function FilterSelect({
 
 /** Prev/next pagination driven by the `page` search param. */
 export function Pager({ page, pageSize, total }: { page: number; pageSize: number; total: number }) {
+  const { t } = useI18n()
   const pathname = usePathname()
   const params = useSearchParams()
   const pages = Math.max(1, Math.ceil(total / pageSize))
@@ -226,29 +231,29 @@ export function Pager({ page, pageSize, total }: { page: number; pageSize: numbe
   return (
     <div className="flex items-center justify-between gap-3 pt-3 text-[13px] text-muted-foreground">
       <span className="tabular-nums">
-        {from}–{to} of {new Intl.NumberFormat("en-US").format(total)}
+        {from}–{to} {t("of")} {new Intl.NumberFormat("en-US").format(total)}
       </span>
       <div className="flex items-center gap-1">
         {page > 1 ? (
           <Button asChild variant="outline" size="sm">
             <Link href={href(page - 1)} scroll={false}>
-              <ChevronLeft /> Previous
+              <ChevronLeft /> {t("previous")}
             </Link>
           </Button>
         ) : (
           <Button variant="outline" size="sm" disabled>
-            <ChevronLeft /> Previous
+            <ChevronLeft /> {t("previous")}
           </Button>
         )}
         {page < pages ? (
           <Button asChild variant="outline" size="sm">
             <Link href={href(page + 1)} scroll={false}>
-              Next <ChevronRight />
+              {t("next")} <ChevronRight />
             </Link>
           </Button>
         ) : (
           <Button variant="outline" size="sm" disabled>
-            Next <ChevronRight />
+            {t("next")} <ChevronRight />
           </Button>
         )}
       </div>
@@ -292,6 +297,7 @@ export function ConfirmButton<T>({
 }) {
   const [open, setOpen] = useState(false)
   const [typed, setTyped] = useState("")
+  const { t } = useI18n()
   const { pending, run } = useAdminAction()
   const blocked = Boolean(confirmText) && typed.trim() !== confirmText
   return (
@@ -315,13 +321,13 @@ export function ConfirmButton<T>({
         {confirmText && (
           <div className="space-y-1.5">
             <label htmlFor="confirm-text" className="text-[13px] text-muted-foreground">
-              Type <span className="font-mono font-medium text-foreground">{confirmText}</span> to confirm
+              {t("typeToConfirm")} <span className="font-mono font-medium text-foreground">{confirmText}</span> {t("toConfirm")}
             </label>
             <Input id="confirm-text" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" autoFocus />
           </div>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={pending}>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             variant={destructive ? "destructive" : "default"}
             disabled={pending || blocked}
@@ -332,7 +338,7 @@ export function ConfirmButton<T>({
             }}
           >
             {pending && <Spinner />}
-            {confirmLabel}
+            {confirmLabel === "Confirm" ? t("confirm") : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
