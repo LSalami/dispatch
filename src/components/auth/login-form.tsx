@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
-import { requestLoginCodeAction, verifyLoginCodeAction } from "@/app/login/actions"
+import { loginWithPasswordAction, requestLoginCodeAction, verifyLoginCodeAction } from "@/app/login/actions"
 import { cn } from "@/lib/utils"
 
 const RESEND_COOLDOWN = 30
@@ -15,8 +15,8 @@ const RESEND_COOLDOWN = 30
 export type LoginNotice = { tone: "success" | "error" | "info"; text: string }
 
 /**
- * Passwordless sign-in: email → 6-digit code (or the magic link in the same
- * email). Used by /login and by /setup ("continue setup").
+ * Sign-in supports a local password and keeps the existing magic-link flow as
+ * a recovery/fallback method.
  */
 export function LoginForm({
   next,
@@ -34,7 +34,9 @@ export function LoginForm({
   signupHint?: string
 }) {
   const [step, setStep] = useState<"email" | "code">("email")
+  const [mode, setMode] = useState<"password" | "magic">("password")
   const [email, setEmail] = useState(initialEmail)
+  const [password, setPassword] = useState("")
   const [code, setCode] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [delivered, setDelivered] = useState(true)
@@ -64,6 +66,15 @@ export function LoginForm({
       setCooldown(RESEND_COOLDOWN)
       setStep("code")
       if (opts.resend) setError(null)
+    })
+  }
+
+  function loginWithPassword() {
+    setError(null)
+    startTransition(async () => {
+      const res = await loginWithPasswordAction({ email, password, next })
+      if (res && !res.ok) setError(res.error)
+      else setRedirecting(true)
     })
   }
 
@@ -194,16 +205,11 @@ export function LoginForm({
       <h1 className="text-[26px] leading-tight font-semibold tracking-tight text-balance">
         Welcome back<span className="text-quiet">. Let&apos;s get you to your inbox.</span>
       </h1>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-        No passwords here. Enter your email and we&apos;ll send you a sign-in link and code.
-      </p>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Sign in with your password or use a one-time code sent by email.</p>
 
       <form
         className="mt-7"
-        onSubmit={(e) => {
-          e.preventDefault()
-          requestCode()
-        }}
+        onSubmit={(e) => { e.preventDefault(); mode === "password" ? loginWithPassword() : requestCode() }}
       >
         <Label htmlFor="login-email" className="mb-1.5 text-[13px]">
           Work email
@@ -229,13 +235,36 @@ export function LoginForm({
           aria-describedby={error ? "login-error" : undefined}
           className="h-10 bg-card"
         />
+        {mode === "password" && (
+          <>
+            <Label htmlFor="login-password" className="mb-1.5 mt-4 text-[13px]">Password</Label>
+            <Input
+              id="login-password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); if (error) setError(null) }}
+              className="h-10 bg-card"
+            />
+          </>
+        )}
         {error && <ErrorText id="login-error">{error}</ErrorText>}
         <Button type="submit" size="lg" className="mt-3 h-10 w-full rounded-md" disabled={pending || !email.trim()}>
           {pending ? <Spinner /> : null}
-          Continue with email
+          {mode === "password" ? "Sign in" : "Send sign-in code"}
           {!pending && <ArrowRight />}
         </Button>
       </form>
+
+      <button
+        type="button"
+        className="mt-4 w-full text-center text-[13px] text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        onClick={() => { setMode(mode === "password" ? "magic" : "password"); setError(null) }}
+      >
+        {mode === "password" ? "Use a one-time email code instead" : "Use password instead"}
+      </button>
 
       {hasProviders && (
         <>

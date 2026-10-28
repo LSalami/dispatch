@@ -72,7 +72,7 @@ export function SetupWizard(props: SetupWizardProps) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // Step state lives here so going back keeps what was entered
-  const [ownerForm, setOwnerForm] = useState({ setupCode: "", name: "", email: "" })
+  const [ownerForm, setOwnerForm] = useState({ setupCode: "", name: "", email: "", password: "" })
   const [general, setGeneral] = useState(props.general)
   const [auth, setAuth] = useState(props.auth)
   const [email, setEmail] = useState<EmailDeliveryValue>(props.email)
@@ -171,7 +171,7 @@ export function SetupWizard(props: SetupWizardProps) {
             eyebrow={`Step 2 of ${STEPS.length}`}
             title="Create the owner account."
             quiet="This is your super admin login."
-            description="The instance owner can manage every workspace, user and setting from the admin panel. Sign-in is passwordless — later you'll receive a link and code by email."
+            description="The instance owner can manage every workspace, user and setting from the admin panel. Choose a password; email codes remain available as a recovery method."
           >
             {owner ? (
               <>
@@ -250,6 +250,22 @@ export function SetupWizard(props: SetupWizardProps) {
                       aria-invalid={Boolean(err("name"))}
                     />
                     {err("name") && <FieldError>{err("name")}</FieldError>}
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="owner-password" className="text-[13px]">Password</Label>
+                    <Input
+                      id="owner-password"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      minLength={12}
+                      value={ownerForm.password}
+                      onChange={(e) => setOwnerForm((f) => ({ ...f, password: e.target.value }))}
+                      placeholder="At least 12 characters"
+                      className="h-10 bg-card"
+                      aria-invalid={Boolean(err("password"))}
+                    />
+                    {err("password") ? <FieldError>{err("password")}</FieldError> : <p className="text-xs text-muted-foreground">At least 12 characters. Keep it unique to Dispatch.</p>}
                   </div>
                   <div className="grid gap-1.5">
                     <Label htmlFor="owner-email" className="text-[13px]">

@@ -16,6 +16,7 @@ import {
   SuperAdminControl,
   type SessionItem,
 } from "@/components/admin/users/user-controls"
+import { CredentialsControl } from "@/components/admin/users/credentials-control"
 
 export async function generateMetadata({ params }: PageProps<"/admin/users/[id]">): Promise<Metadata> {
   await requireSuperAdminPage()
@@ -136,6 +137,10 @@ export default async function AdminUserDetailPage({ params, searchParams }: Page
                 ...(user.awayUntil && user.awayUntil > new Date() ? [{ label: "Away until", value: <LocalTime date={user.awayUntil} /> }] : []),
               ]}
             />
+          </Panel>
+
+          <Panel title="Login credentials" description="Change the login email or set a local password. The existing email-code login remains available.">
+            <CredentialsControl id={user.id} email={user.email} />
           </Panel>
 
           <Panel title="Workspaces" description={`Member of ${memberships.length} ${memberships.length === 1 ? "workspace" : "workspaces"}`} bodyClassName="p-0">

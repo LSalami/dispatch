@@ -104,6 +104,8 @@ export const users = pgTable(
   {
     id: id(),
     email: text("email").notNull(),
+    /** Optional local password. Magic-link login remains available when null. */
+    passwordHash: text("password_hash"),
     name: text("name"),
     avatarUrl: text("avatar_url"),
     isSuperAdmin: boolean("is_super_admin").notNull().default(false),
