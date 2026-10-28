@@ -57,7 +57,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
             <p className="mt-0.5 text-xs text-pretty text-muted-foreground">
               {r.description || t("roleNoDescription")}
               <span className="text-subtle"> · </span>
-              {r.key === "owner" ? "All permissions" : `${r.permissions.length} of ${ALL_PERMISSIONS.length} permissions`}
+              {r.key === "owner" ? t("roleAllPermissions") : `${r.permissions.length} / ${ALL_PERMISSIONS.length} ${t("rolePermissionCount")}`}
             </p>
           </div>
         </div>
@@ -72,16 +72,16 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
             )}
             <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
               {pluralize(r.memberCount, "member")}
-              {r.pendingInvitations > 0 && ` · ${r.pendingInvitations} invited`}
+              {r.pendingInvitations > 0 && ` · ${r.pendingInvitations} ${t("roleInvited")}`}
             </span>
           </div>
           <div className="ml-auto flex items-center gap-1 sm:ml-0">
             {locked ? (
               <span
                 className="inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs text-muted-foreground"
-                title={outranks ? "This role has permissions you don't have" : "The Owner role always has every permission"}
+                title={outranks ? t("roleLockedHigher") : t("roleLockedOwner")}
               >
-                <Lock className="size-3" /> Locked
+                <Lock className="size-3" /> {t("roleLockedLabel")}
               </span>
             ) : (
               <Button variant="outline" size="sm" onClick={() => setEditor({ mode: "edit", role: r })}>
@@ -96,7 +96,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem disabled={!canGrantAll(r)} onClick={() => setEditor({ mode: "create", from: r })}>
-                  <Copy /> Duplicate
+                  <Copy /> {t("roleDuplicate")}
                 </DropdownMenuItem>
                 {!r.isSystem && (
                   <>
@@ -116,31 +116,31 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
 
   return (
     <SettingsPage
-      eyebrow="Workspace"
+      eyebrow={t("roleWorkspace")}
       title={t("roleTitle")}
-      quiet="& permissions"
-      description="Every member has one role. Roles decide what people can do in the workspace; which inboxes they see is managed per inbox."
+      quiet={t("rolePermissionsQuiet")}
+      description={t("rolePageDesc")}
       actions={
         <Button onClick={() => setEditor({ mode: "create" })}>
           <Plus /> {t("roleNew")}
         </Button>
       }
     >
-      <SettingsSection flush title={t("roleSystem")} description="Created with every workspace. The Owner role always has full access.">
+      <SettingsSection flush title={t("roleSystem")} description={t("roleSystemDesc")}>
         <ul className="divide-y border-t">{system.map(row)}</ul>
       </SettingsSection>
 
       <SettingsSection
         flush
         title={t("roleCustom")}
-        description="Tailor access for agents, contractors or read-only observers."
+        description={t("roleCustomDesc")}
       >
         {custom.length === 0 ? (
           <div className="px-5 pb-5">
             <EmptyState
               icon={<KeyRound />}
               title={t("roleNoCustom")}
-              description="Start from scratch or duplicate a system role and adjust its permissions."
+              description={t("roleEmptyDesc")}
             >
               <Button variant="outline" size="sm" onClick={() => setEditor({ mode: "create" })}>
                 <Plus /> {t("roleCreate")}
@@ -196,7 +196,7 @@ function DeleteRoleDialog({
     <Dialog open={!!role} onOpenChange={(o) => !o && !pending && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Delete “{role?.name}”?</DialogTitle>
+          <DialogTitle>{t("roleDeleteQuestion").replace("{name}", role?.name ?? "")}</DialogTitle>
           <DialogDescription>
             {inUse
               ? `${[
@@ -205,14 +205,14 @@ function DeleteRoleDialog({
                 ]
                   .filter(Boolean)
                   .join(" and ")} ${role!.memberCount + role!.pendingInvitations === 1 ? "has" : "have"} this role. Choose where to move them.`
-              : "Nobody has this role. It will be removed permanently."}
+              : t("roleNobody")}
           </DialogDescription>
         </DialogHeader>
         {inUse && (
-          <FormField label="Move to" htmlFor="reassign-role">
+          <FormField label={t("roleMoveTo")} htmlFor="reassign-role">
             <Select value={target} onValueChange={setTarget}>
               <SelectTrigger id="reassign-role" className="w-full">
-                <SelectValue placeholder="Choose a role" />
+                <SelectValue placeholder={t("roleChoose")} />
               </SelectTrigger>
               <SelectContent position="popper">
                 {options.map((r) => (
@@ -236,7 +236,7 @@ function DeleteRoleDialog({
             onClick={() =>
               role &&
               void run(() => deleteRoleAction({ slug, id: role.id, reassignToRoleId: inUse ? target : null }), {
-                success: `Role “${role.name}” deleted`,
+                success: t("roleDeletedSuccess").replace("{name}", role.name),
                 onSuccess: onClose,
               })
             }
