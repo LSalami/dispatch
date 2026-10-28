@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
+import { cookies } from "next/headers"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Providers } from "@/components/providers"
 import { getAppUrl } from "@/server/env"
@@ -40,8 +41,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Per-request CSP nonce from src/proxy.ts (also makes every page dynamic, which nonces require)
   const nonce = (await headers()).get("x-nonce") ?? undefined
   const session = await getCurrentSession()
-  const acceptLanguage = (await headers()).get("accept-language") ?? ""
-  const locale: Locale = session?.user.locale === "it" || (!session && acceptLanguage.toLowerCase().startsWith("it")) ? "it" : "en"
+  const requestHeaders = await headers()
+  const acceptLanguage = requestHeaders.get("accept-language") ?? ""
+  const preferredCookie = (await cookies()).get("dispatch-locale")?.value
+  const locale: Locale = session?.user.locale === "it" || (!session && (preferredCookie === "it" || (!preferredCookie && acceptLanguage.toLowerCase().startsWith("it")))) ? "it" : "en"
   return (
     <html lang={locale} suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full">

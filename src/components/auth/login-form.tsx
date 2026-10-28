@@ -49,6 +49,11 @@ export function LoginForm({
   const emailRef = useRef<HTMLInputElement>(null)
   const codeRef = useRef<HTMLInputElement>(null)
 
+  function changeLocale(nextLocale: "en" | "it") {
+    document.cookie = `dispatch-locale=${nextLocale}; path=/; max-age=31536000; samesite=lax`
+    window.location.reload()
+  }
+
   useEffect(() => {
     if (cooldown <= 0) return
     const t = setTimeout(() => setCooldown((c) => c - 1), 1000)
@@ -203,7 +208,16 @@ export function LoginForm({
   return (
     <div>
       {notice && <NoticeBanner notice={notice} />}
-      <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{t("signIn")}</div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">{t("signIn")}</div>
+        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <span className="sr-only">{t("language")}</span>
+          <select value={locale} onChange={(e) => changeLocale(e.target.value as "en" | "it")} className="rounded-md border bg-card px-2 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring">
+            <option value="en">English</option>
+            <option value="it">Italiano</option>
+          </select>
+        </label>
+      </div>
       <h1 className="text-[26px] leading-tight font-semibold tracking-tight text-balance">
         {t("welcome")}
       </h1>
