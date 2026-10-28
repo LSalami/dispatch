@@ -20,6 +20,7 @@ import { RoleEditor, type RoleEditorTarget } from "@/components/settings/roles/r
 import { deleteRoleAction } from "@/server/workspace/actions/roles"
 import type { RoleRow, RolesPageData } from "@/server/workspace/queries/roles"
 import { ALL_PERMISSIONS } from "@/lib/permissions"
+import { useI18n } from "@/lib/i18n"
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -30,6 +31,7 @@ function Tag({ children }: { children: React.ReactNode }) {
 }
 
 export function RolesSettings({ slug, data }: { slug: string; data: RolesPageData }) {
+  const { t } = useI18n()
   const { roles, isOwner, grantable } = data
   const [editor, setEditor] = useState<RoleEditorTarget>(null)
   const [deleting, setDeleting] = useState<RoleRow | null>(null)
@@ -48,12 +50,12 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[13px] font-semibold">{r.name}</span>
-              {r.isSystem && <Tag>System</Tag>}
-              {r.isDefault && <Tag>Default</Tag>}
-              {r.isYours && <Tag>Your role</Tag>}
+              {r.isSystem && <Tag>{t("roleSystem")}</Tag>}
+              {r.isDefault && <Tag>{t("roleDefault")}</Tag>}
+              {r.isYours && <Tag>{t("roleYour")}</Tag>}
             </div>
             <p className="mt-0.5 text-xs text-pretty text-muted-foreground">
-              {r.description || "No description"}
+              {r.description || t("roleNoDescription")}
               <span className="text-subtle"> · </span>
               {r.key === "owner" ? "All permissions" : `${r.permissions.length} of ${ALL_PERMISSIONS.length} permissions`}
             </p>
@@ -83,7 +85,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
               </span>
             ) : (
               <Button variant="outline" size="sm" onClick={() => setEditor({ mode: "edit", role: r })}>
-                <Pencil /> Edit
+                <Pencil /> {t("roleEdit")}
               </Button>
             )}
             <DropdownMenu>
@@ -100,7 +102,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive" disabled={outranks} onClick={() => setDeleting(r)}>
-                      <Trash2 /> Delete role
+                      <Trash2 /> {t("roleDelete")}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -115,33 +117,33 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
   return (
     <SettingsPage
       eyebrow="Workspace"
-      title="Roles"
+      title={t("roleTitle")}
       quiet="& permissions"
       description="Every member has one role. Roles decide what people can do in the workspace; which inboxes they see is managed per inbox."
       actions={
         <Button onClick={() => setEditor({ mode: "create" })}>
-          <Plus /> New role
+          <Plus /> {t("roleNew")}
         </Button>
       }
     >
-      <SettingsSection flush title="System roles" description="Created with every workspace. The Owner role always has full access.">
+      <SettingsSection flush title={t("roleSystem")} description="Created with every workspace. The Owner role always has full access.">
         <ul className="divide-y border-t">{system.map(row)}</ul>
       </SettingsSection>
 
       <SettingsSection
         flush
-        title="Custom roles"
+        title={t("roleCustom")}
         description="Tailor access for agents, contractors or read-only observers."
       >
         {custom.length === 0 ? (
           <div className="px-5 pb-5">
             <EmptyState
               icon={<KeyRound />}
-              title="No custom roles yet"
+              title={t("roleNoCustom")}
               description="Start from scratch or duplicate a system role and adjust its permissions."
             >
               <Button variant="outline" size="sm" onClick={() => setEditor({ mode: "create" })}>
-                <Plus /> Create a role
+                <Plus /> {t("roleCreate")}
               </Button>
             </EmptyState>
           </div>
@@ -179,6 +181,7 @@ function DeleteRoleDialog({
   isOwner: boolean
   onClose: () => void
 }) {
+  const { t } = useI18n()
   const inUse = !!role && role.memberCount + role.pendingInvitations > 0
   const options = roles.filter(
     (r) =>
@@ -224,7 +227,7 @@ function DeleteRoleDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={pending}>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -239,7 +242,7 @@ function DeleteRoleDialog({
             }
           >
             {pending && <Loader2 className="animate-spin" />}
-            Delete role
+            {t("roleDelete")}
           </Button>
         </DialogFooter>
       </DialogContent>
