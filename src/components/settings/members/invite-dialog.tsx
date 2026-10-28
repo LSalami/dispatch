@@ -82,24 +82,24 @@ export function InviteDialog({
     >
       <DialogTrigger asChild>
         <Button>
-          <UserPlus /> Invite people
+          <UserPlus /> {t("invitePeople")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-lg">
         {!result ? (
           <>
             <DialogHeader>
-              <DialogTitle>Invite people to {orgName}</DialogTitle>
+              <DialogTitle>{t("inviteTo")} {orgName}</DialogTitle>
               <DialogDescription>
                 {emailDelivery
-                  ? "We'll email each person an invitation that's valid for 14 days."
-                  : "You'll get a personal invite link for each person to share."}
+                  ? t("inviteEmailDescription")
+                  : t("inviteShareDescription")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="flex flex-col gap-4">
               <FormField
-                label="Email addresses"
+                label={t("inviteEmails")}
                 htmlFor="invite-emails"
                 error={fieldErrors.emails ?? (parsed.invalid.length ? `Not valid: ${parsed.invalid.slice(0, 3).join(", ")}${parsed.invalid.length > 3 ? "…" : ""}` : undefined)}
                 description="Separate multiple addresses with commas, spaces or new lines."
@@ -128,10 +128,10 @@ export function InviteDialog({
                 </div>
               )}
 
-              <FormField label="Role" htmlFor="invite-role" error={fieldErrors.roleId} description={role?.description ?? undefined}>
+              <FormField label={t("inviteRole")} htmlFor="invite-role" error={fieldErrors.roleId} description={role?.description ?? undefined}>
                 <Select value={roleId} onValueChange={setRoleId}>
                   <SelectTrigger id="invite-role" className="w-full">
-                    <SelectValue placeholder="Choose a role" />
+                    <SelectValue placeholder={t("inviteChooseRole")} />
                   </SelectTrigger>
                   <SelectContent position="popper">
                     {roles.map((r) => (
@@ -145,14 +145,14 @@ export function InviteDialog({
               </FormField>
 
               {teams.length > 0 && (
-                <FormField label="Teams" optional htmlFor="invite-teams" description="They'll join these teams when they accept.">
+                <FormField label={t("inviteTeams")} optional htmlFor="invite-teams" description="They’ll join these teams when they accept.">
                   <MultiCombobox
                     id="invite-teams"
                     options={teams.map((t) => ({ value: t.id, label: t.name, icon: <ColorDot color={t.color} className="size-2" /> }))}
                     value={teamIds}
                     onChange={setTeamIds}
-                    placeholder="No teams"
-                    searchPlaceholder="Search teams…"
+                    placeholder={t("inviteNoTeams")}
+                    searchPlaceholder={t("inviteSearchTeams")}
                   />
                 </FormField>
               )}
@@ -170,15 +170,15 @@ export function InviteDialog({
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
-                Cancel
+                {t("inviteCancel")}
               </Button>
               <Button onClick={submit} disabled={pending || parsed.valid.length === 0 || !roleId}>
                 {pending ? <Loader2 className="animate-spin" /> : <MailPlus />}
                 {parsed.valid.length > 1
-                  ? `${emailDelivery ? "Send" : "Create"} ${parsed.valid.length} invitations`
+                    ? `${emailDelivery ? "Send" : "Create"} ${parsed.valid.length} invitations`
                   : emailDelivery
-                    ? "Send invitation"
-                    : "Create invitation"}
+                    ? t("inviteSend")
+                    : t("inviteCreate")}
               </Button>
             </DialogFooter>
           </>
@@ -188,12 +188,12 @@ export function InviteDialog({
               <DialogTitle className="flex items-center gap-2">
                 {result.invited.length > 0 && <CheckCircle2 className="size-4 text-success" />}
                 {result.invited.length === 0
-                  ? "Nobody was invited"
-                  : `${result.invited.length} ${result.invited.length === 1 ? "invitation" : "invitations"} created`}
+                  ? t("inviteNobody")
+                  : `${result.invited.length} ${t("inviteCreated")}`}
               </DialogTitle>
               <DialogDescription>
-                {sent.length > 0 && `${sent.length} ${sent.length === 1 ? "email" : "emails"} sent. `}
-                {result.invited.length > 0 && t("invitationLinkHelp")}
+                {sent.length > 0 && `${sent.length} ${t("inviteEmailSent")}. `}
+                {result.invited.length > 0 && t("inviteLinksShare")}
               </DialogDescription>
             </DialogHeader>
 
@@ -226,7 +226,7 @@ export function InviteDialog({
 
             {result.skipped.length > 0 && (
               <div className="rounded-lg border">
-                <div className="border-b px-3 py-2 text-[13px] font-medium">Skipped</div>
+                <div className="border-b px-3 py-2 text-[13px] font-medium">{t("inviteSkipped")}</div>
                 <ul className="divide-y text-[13px]">
                   {result.skipped.map((s) => (
                     <li key={s.email} className="flex flex-col gap-0.5 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -240,7 +240,7 @@ export function InviteDialog({
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setResult(null)}>
-                Invite more
+                {t("invitePeople")}
               </Button>
               <Button
                 onClick={() => {
@@ -248,7 +248,7 @@ export function InviteDialog({
                   reset()
                 }}
               >
-                Done
+                {t("inviteDone")}
               </Button>
             </DialogFooter>
           </>
