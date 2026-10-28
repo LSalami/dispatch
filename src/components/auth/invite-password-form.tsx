@@ -18,6 +18,7 @@ export function InvitePasswordForm({ token, email }: { token: string; email: str
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
+    if (password.length < 12 || confirm.length < 12) return setError(t("passwordTooShort"))
     if (password !== confirm) return setError(t("passwordsDoNotMatch"))
     setError(null)
     startTransition(async () => {
@@ -38,7 +39,7 @@ export function InvitePasswordForm({ token, email }: { token: string; email: str
       </div>
       <p className="text-xs text-muted-foreground">{t("invitePasswordHelp")} {email}</p>
       {error && <p role="alert" className="text-[13px] text-destructive">{error}</p>}
-      <Button type="submit" size="lg" className="h-10 w-full rounded-md" disabled={pending || password.length < 12 || confirm.length < 12}>
+      <Button type="submit" size="lg" className="h-10 w-full rounded-md" disabled={pending}>
         {pending ? <Spinner /> : null}
         {t("setPasswordAndJoin")}
         {!pending && <ArrowRight />}
