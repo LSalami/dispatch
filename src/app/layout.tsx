@@ -40,7 +40,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Per-request CSP nonce from src/proxy.ts (also makes every page dynamic, which nonces require)
   const nonce = (await headers()).get("x-nonce") ?? undefined
   const session = await getCurrentSession()
-  const locale: Locale = session?.user.locale === "it" ? "it" : "en"
+  const acceptLanguage = (await headers()).get("accept-language") ?? ""
+  const locale: Locale = session?.user.locale === "it" || (!session && acceptLanguage.toLowerCase().startsWith("it")) ? "it" : "en"
   return (
     <html lang={locale} suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full">
