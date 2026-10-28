@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { UserAvatar } from "@/components/app/user-avatar"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 import { dueOn } from "./quick-add"
 import type { TaskMember, TaskStatus, TaskTeam } from "./use-tasks"
 
@@ -72,6 +73,8 @@ export function StatusMenu({
   children: React.ReactNode
   align?: "start" | "end"
 }) {
+  const { t } = useI18n()
+  const labels = { todo: t("toDo"), in_progress: t("inProgress"), done: t("done") } as const
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={disabled}>
@@ -81,7 +84,7 @@ export function StatusMenu({
         {STATUS_ORDER.map((s) => (
           <DropdownMenuItem key={s} onSelect={() => onChange(s)}>
             <StatusIcon status={s} />
-            {STATUS_META[s].label}
+            {labels[s]}
             {value === s && <Check className="ml-auto" />}
           </DropdownMenuItem>
         ))}
@@ -147,6 +150,7 @@ export function DuePicker({
   align?: "start" | "end" | "center"
   disabled?: boolean
 }) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const selected = value ? new Date(value) : undefined
   const pick = (d: Date | null) => {
@@ -155,9 +159,9 @@ export function DuePicker({
   }
   const today = new Date()
   const quick = [
-    { label: "Today", date: today, hint: format(today, "EEE") },
-    { label: "Tomorrow", date: addDays(today, 1), hint: format(addDays(today, 1), "EEE") },
-    { label: "Next week", date: nextMonday(today), hint: format(nextMonday(today), "MMM d") },
+    { label: t("today"), date: today, hint: format(today, "EEE") },
+    { label: t("tomorrow"), date: addDays(today, 1), hint: format(addDays(today, 1), "EEE") },
+    { label: t("nextWeek"), date: nextMonday(today), hint: format(nextMonday(today), "MMM d") },
   ]
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -183,7 +187,7 @@ export function DuePicker({
               onClick={() => pick(null)}
               className="flex h-8 items-center gap-1.5 rounded-md px-2 text-left text-[13px] text-muted-foreground outline-none hover:bg-accent focus-visible:bg-accent"
             >
-              <X className="size-3.5" /> Remove due date
+              <X className="size-3.5" /> {t("removeDueDate")}
             </button>
           )}
         </div>
@@ -222,6 +226,7 @@ export function AssigneePicker({
   /** Members without tasks.manage may only assign themselves */
   restrictToMe?: boolean
 }) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const me = members.find((m) => m.id === meId)
   const others = members.filter((m) => m.id !== meId)
@@ -236,22 +241,22 @@ export function AssigneePicker({
       </PopoverTrigger>
       <PopoverContent align={align} className="w-64 p-0">
         <Command>
-          <CommandInput placeholder="Assign to…" />
+          <CommandInput placeholder={t("assignTo")} />
           <CommandList>
-            <CommandEmpty>No teammate found.</CommandEmpty>
+            <CommandEmpty>{t("noTeammateFound")}</CommandEmpty>
             <CommandGroup>
               <CommandItem value="unassigned no one" onSelect={() => pick(null)}>
                 <span className="flex size-5 items-center justify-center rounded-full border border-dashed">
                   <UserRound className="size-3 text-muted-foreground" />
                 </span>
-                Unassigned
+                {t("unassigned")}
                 {value === null && <Check className="ml-auto" />}
               </CommandItem>
               {me && (
                 <CommandItem value={`me ${me.name ?? ""} ${me.email}`} onSelect={() => pick(me.id)}>
                   <UserAvatar name={me.name} email={me.email} src={me.avatarUrl} size="xs" />
                   <span className="truncate">{me.name || me.email}</span>
-                  <span className="text-xs text-muted-foreground">(you)</span>
+                  <span className="text-xs text-muted-foreground">({t("you")})</span>
                   {value === me.id && <Check className="ml-auto" />}
                 </CommandItem>
               )}

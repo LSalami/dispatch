@@ -31,6 +31,7 @@ import {
 } from "./task-fields"
 import type { TaskDto, TaskOptions, TaskPatch } from "./use-tasks"
 import { renderTaskMarkdown } from "./task-markdown"
+import { useI18n } from "@/lib/i18n"
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -80,6 +81,7 @@ function TaskDetailBody({
   onUpdate: (id: string, patch: TaskPatch) => void
   onDelete: (id: string) => void
 }) {
+  const { t } = useI18n()
   // Local edit state; the component is keyed by task id so it resets per task
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description ?? "")
@@ -126,12 +128,12 @@ function TaskDetailBody({
           )}
         </div>
         <SheetTitle className="sr-only">{task.title}</SheetTitle>
-        <SheetDescription className="sr-only">Task details</SheetDescription>
+        <SheetDescription className="sr-only">{t("taskDetails")}</SheetDescription>
         <Textarea
           ref={titleRef}
           value={title}
           disabled={!editable}
-          aria-label="Task title"
+          aria-label={t("taskTitle")}
           onChange={(e) => setTitle(e.target.value)}
           onBlur={commitTitle}
           onKeyDown={(e) => {
@@ -153,7 +155,7 @@ function TaskDetailBody({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
         <div className="flex flex-col gap-1">
-          <Row label="Assignee">
+          <Row label={t("assignee")}>
             <AssigneePicker
               members={members}
               value={task.assignee?.id ?? null}
@@ -170,7 +172,7 @@ function TaskDetailBody({
               </button>
             </AssigneePicker>
           </Row>
-          <Row label="Due date">
+          <Row label={t("dueDate")}>
             <DuePicker value={task.dueAt} onChange={(iso) => onUpdate(task.id, { dueAt: iso })} disabled={!editable}>
               <button
                 type="button"
@@ -183,13 +185,13 @@ function TaskDetailBody({
               >
                 <CalendarDays className="size-4 shrink-0 opacity-70" />
                 <span className="truncate">
-                  {task.dueAt ? `${formatDue(task.dueAt, { long: true })} · ${format(new Date(task.dueAt), "MMM d")}` : "No due date"}
+                  {task.dueAt ? `${formatDue(task.dueAt, { long: true })} · ${format(new Date(task.dueAt), "MMM d")}` : t("noDueDate")}
                 </span>
-                {due === "overdue" && <span className="text-xs font-medium">Overdue</span>}
+                {due === "overdue" && <span className="text-xs font-medium">{t("overdue")}</span>}
               </button>
             </DuePicker>
           </Row>
-          <Row label="Team">
+          <Row label={t("teams")}>
             <TeamMenu teams={teams} value={task.team?.id ?? null} onChange={(id) => onUpdate(task.id, { teamId: id })} disabled={!editable}>
               <button type="button" className={cn(fieldButton, !task.team && "text-muted-foreground")}>
                 {task.team ? (
@@ -197,12 +199,12 @@ function TaskDetailBody({
                 ) : (
                   <Users className="size-4 shrink-0 opacity-70" />
                 )}
-                <span className="truncate">{task.team?.name ?? "No team"}</span>
+                <span className="truncate">{task.team?.name ?? t("noTeam")}</span>
               </button>
             </TeamMenu>
           </Row>
           {task.conversation && (
-            <Row label="Conversation">
+            <Row label={t("conversationLabel")}>
               <Link
                 href={`/w/${slug}/all/${task.conversation.id}`}
                 className={cn(fieldButton, "text-foreground")}
@@ -217,7 +219,7 @@ function TaskDetailBody({
 
         <div className="mt-5">
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">Description</span>
+            <span className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">{t("description")}</span>
             {editable && description && (
               <Button variant="ghost" size="xs" onClick={() => setPreview((p) => !p)} className="text-muted-foreground">
                 {preview ? <Pencil /> : <Eye />}
