@@ -11,6 +11,7 @@ import type { ConversationThread } from "@/lib/inbox/types"
 import { inboxUI } from "@/hooks/inbox/store"
 import { useInbox } from "../inbox-provider"
 import { useEventText } from "./event-item"
+import { useI18n } from "@/lib/i18n"
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -33,6 +34,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 /** Right sidebar: customer (contact card), tasks, conversation details and recent activity. */
 export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; onClose?: () => void }) {
   const { slug, account, team, member } = useInbox()
+  const { t } = useI18n()
   const describe = useEventText()
   const conv = thread.conversation
   const isChat = conv.kind === "chat"
@@ -43,7 +45,7 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
   return (
     <div className="flex h-full min-h-0 flex-col bg-card">
       <div className="flex h-12 shrink-0 items-center justify-between border-b px-4">
-        <h2 className="text-sm font-semibold tracking-tight">Details</h2>
+        <h2 className="text-sm font-semibold tracking-tight">{t("details")}</h2>
         {onClose && (
           <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close details">
             <X />
@@ -52,12 +54,12 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
       </div>
       <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
         {people.length > 0 && (
-          <Section title="Contact">
+          <Section title={t("contact")}>
             <ContactCard slug={slug} email={people[0]!.email} name={people[0]!.name} excludeConversationId={conv.id} />
           </Section>
         )}
         {people.length > 1 && (
-          <Section title="Also in this conversation">
+          <Section title={t("alsoInConversation")}>
             <ul className="space-y-3">
               {people.slice(1, 10).map((p) => (
                 <li key={p.email} className="flex items-center gap-3">
@@ -72,7 +74,7 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
                     aria-label={`Copy ${p.email}`}
                     onClick={() => {
                       void navigator.clipboard.writeText(p.email)
-                      toast.success("Email copied")
+                      toast.success(t("emailCopied"))
                     }}
                   >
                     <Copy />
@@ -87,20 +89,20 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
         )}
 
         {!isChat && (
-          <Section title="Tasks">
+          <Section title={t("tasks")}>
             <ConversationTasks slug={slug} conversationId={conv.id} />
           </Section>
         )}
 
         {isChat && (
-          <Section title="Members">
+          <Section title={t("members")}>
             <ul className="space-y-2.5">
               {conv.chatMemberIds.map((id) => {
                 const m = member(id)
                 return (
                   <li key={id} className="flex items-center gap-2.5">
                     <UserAvatar name={m?.name} email={m?.email} src={m?.avatarUrl} size="sm" />
-                    <span className="min-w-0 flex-1 truncate text-[13px]">{memberName(m, "Former member")}</span>
+                    <span className="min-w-0 flex-1 truncate text-[13px]">{memberName(m, t("formerMember"))}</span>
                     {m?.title && <span className="truncate text-xs text-muted-foreground">{m.title}</span>}
                   </li>
                 )
@@ -109,10 +111,10 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
           </Section>
         )}
 
-        <Section title="Conversation">
+        <Section title={t("conversation")}>
           <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-[13px]">
-            <Row label="Number">#{conv.number}</Row>
-            <Row label="Status">{conv.status === "closed" ? "Closed" : "Open"}</Row>
+            <Row label={t("number")}>#{conv.number}</Row>
+            <Row label={t("status")}>{conv.status === "closed" ? t("closed") : t("open")}</Row>
             {acc && (
               <Row label="Inbox">
                 <span className="inline-flex items-center gap-1.5">
@@ -122,13 +124,13 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
               </Row>
             )}
             {tm && <Row label="Team">{tm.name}</Row>}
-            <Row label="Created">
+            <Row label={t("created")}>
               <span title={fullTime(conv.createdAt)}>{relative(conv.createdAt)}</span>
             </Row>
-            {!isChat && <Row label="Messages">{conv.messageCount}</Row>}
-            <Row label="Comments">{conv.commentCount}</Row>
+            {!isChat && <Row label={t("messages")}>{conv.messageCount}</Row>}
+            <Row label={t("comments")}>{conv.commentCount}</Row>
             {conv.firstResponseAt && (
-              <Row label="First reply">
+              <Row label={t("firstReply")}>
                 <span title={fullTime(conv.firstResponseAt)}>{relative(conv.firstResponseAt)}</span>
               </Row>
             )}
@@ -140,12 +142,12 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
                 </span>
               </Row>
             )}
-            <Row label="Assignees">{conv.assigneeIds.length ? conv.assigneeIds.map((id) => memberName(member(id))).join(", ") : "—"}</Row>
+            <Row label={t("assignees")}>{conv.assigneeIds.length ? conv.assigneeIds.map((id) => memberName(member(id))).join(", ") : "—"}</Row>
           </dl>
         </Section>
 
         {thread.events.length > 0 && (
-          <Section title="Activity">
+          <Section title={t("activity")}>
             <ol className="space-y-2.5">
               {[...thread.events]
                 .reverse()

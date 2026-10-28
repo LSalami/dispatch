@@ -15,6 +15,7 @@ import type { NotificationItem } from "@/lib/inbox/types"
 import { cn } from "@/lib/utils"
 import { inboxKeys, useNotifications } from "@/hooks/inbox/queries"
 import { useInbox } from "./inbox-provider"
+import { useI18n } from "@/lib/i18n"
 
 const TYPE_ICON: Record<string, typeof Bell> = {
   mention: AtSign,
@@ -26,6 +27,7 @@ const TYPE_ICON: Record<string, typeof Bell> = {
 
 export function NotificationsButton({ onNavigate }: { onNavigate?: () => void }) {
   const { slug, member } = useInbox()
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const params = useParams<{ box?: string }>()
@@ -73,13 +75,13 @@ export function NotificationsButton({ onNavigate }: { onNavigate?: () => void })
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent>Notifications</TooltipContent>
+        <TooltipContent>{t("notifications")}</TooltipContent>
       </Tooltip>
       <PopoverContent align="start" side="top" className="w-[min(24rem,calc(100vw-1rem))] gap-0 p-0">
         <div className="flex items-center justify-between border-b px-3 py-2">
-          <p className="text-sm font-semibold tracking-tight">Notifications</p>
+          <p className="text-sm font-semibold tracking-tight">{t("notifications")}</p>
           <Button variant="ghost" size="xs" disabled={!unread || mark.isPending} onClick={() => mark.mutate({ all: true })}>
-            <CheckCheck /> Mark all read
+            <CheckCheck /> {t("markAllRead")}
           </Button>
         </div>
         {permission === "default" && (
@@ -89,18 +91,18 @@ export function NotificationsButton({ onNavigate }: { onNavigate?: () => void })
             onClick={async () => setPermission(await Notification.requestPermission())}
           >
             <BellRing className="size-4 shrink-0 text-brand" />
-            <span>Enable desktop notifications for mentions and assignments.</span>
+            <span>{t("enableDesktopNotifications")}</span>
           </button>
         )}
         <div className="max-h-[min(28rem,60dvh)] overflow-y-auto">
-          {isLoading && <p className="px-3 py-6 text-center text-sm text-muted-foreground">Loading…</p>}
+          {isLoading && <p className="px-3 py-6 text-center text-sm text-muted-foreground">{t("loading")}</p>}
           {!isLoading && items.length === 0 && (
             <div className="flex flex-col items-center gap-2 px-6 py-10 text-center">
               <span className="flex size-10 items-center justify-center rounded-full bg-muted">
                 <Bell className="size-5 text-muted-foreground" />
               </span>
-              <p className="text-sm font-medium">You&apos;re all caught up</p>
-              <p className="text-xs text-muted-foreground">Mentions, assignments and replies show up here.</p>
+              <p className="text-sm font-medium">{t("allCaughtUp")}</p>
+              <p className="text-xs text-muted-foreground">{t("notificationHelp")}</p>
             </div>
           )}
           <ul>
@@ -137,7 +139,7 @@ export function NotificationsButton({ onNavigate }: { onNavigate?: () => void })
           {hasNextPage && (
             <div className="p-2">
               <Button variant="ghost" size="sm" className="w-full" disabled={isFetchingNextPage} onClick={() => fetchNextPage()}>
-                {isFetchingNextPage ? "Loading…" : "Load more"}
+                {isFetchingNextPage ? t("loading") : t("loadMore")}
               </Button>
             </div>
           )}
