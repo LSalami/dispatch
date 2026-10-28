@@ -43,6 +43,7 @@ import { useShortcutLabel } from "@/hooks/inbox/use-hotkeys"
 import { memberName } from "@/lib/inbox/format"
 import type { LabelSummary } from "@/lib/inbox/types"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 import { useInbox } from "./inbox-provider"
 import { NotificationsButton } from "./notifications-popover"
 import { useShortcutHint } from "./shortcut-hint"
@@ -179,6 +180,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
   const shortcutLabel = useShortcutLabel()
   const { slug, bootstrap, member, meId } = useInbox()
   const { can } = useOrg()
+  const { t } = useI18n()
   const hint = useShortcutHint()
   const params = useParams<{ box?: string; conversationId?: string }>()
   const current = params.box ? decodeURIComponent(params.box) : ""
@@ -189,6 +191,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
   const base = `/w/${slug}`
   const tree = useMemo(() => labelTree(bootstrap.labels), [bootstrap.labels])
   const moreActive = MORE.some((m) => m.box === current)
+  const boxLabel: Record<string, Parameters<typeof t>[0]> = { inbox: "inbox", assigned: "assigned", mentions: "mentions", starred: "starred", snoozed: "snoozed", drafts: "drafts", scheduled: "scheduled", sent: "sent", unassigned: "unassigned", all: "allConversations", closed: "closed", spam: "spam", trash: "trash" }
 
   const renderLabel = (l: LabelNode, depth: number): React.ReactNode => (
     <div key={l.id}>
@@ -214,11 +217,11 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
         {onCollapse && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" onClick={onCollapse} aria-label="Collapse sidebar">
+              <Button variant="ghost" size="icon-sm" onClick={onCollapse} aria-label={t("less")}>
                 <PanelLeftClose />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Collapse sidebar</TooltipContent>
+            <TooltipContent>{t("less")}</TooltipContent>
           </Tooltip>
         )}
       </div>
@@ -232,7 +235,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           }}
         >
           <SquarePen />
-          Compose
+          {t("compose")}
           {hint("compose") && <Kbd className="ml-auto bg-primary-foreground/15 text-primary-foreground/80 max-lg:hidden">{hint("compose")}</Kbd>}
         </Button>
         <Tooltip>
@@ -241,7 +244,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
               variant="outline"
               size="icon"
               className="max-lg:size-10"
-              aria-label="Search"
+              aria-label={t("search")}
               onClick={() => {
                 onNavigate?.()
                 inboxUI.set({ paletteOpen: true, paletteQuery: "" })
@@ -251,7 +254,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            Search <Kbd>{shortcutLabel("mod+k")[0]}</Kbd>
+            {t("search")} <Kbd>{shortcutLabel("mod+k")[0]}</Kbd>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -264,7 +267,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
               href={`${base}/${item.box}`}
               active={current === item.box}
               icon={item.icon}
-              label={item.label}
+              label={t(boxLabel[item.box] ?? "inbox")}
               count={item.count ? counts[item.box] : undefined}
               tone={item.count === "unread" && item.box !== "mentions" ? "brand" : "muted"}
               onNavigate={onNavigate}
@@ -277,7 +280,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             className="flex h-8 items-center gap-2.5 rounded-md px-2 text-[13px] text-muted-foreground outline-none hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring max-lg:h-10"
           >
             <ChevronRight className={cn("size-4 transition-transform", (showMore || moreActive) && "rotate-90")} />
-            {showMore || moreActive ? "Less" : "More"}
+            {showMore || moreActive ? t("less") : t("more")}
           </button>
           {(showMore || moreActive) &&
             MORE.map((item) => (
@@ -286,7 +289,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                 href={`${base}/${item.box}`}
                 active={current === item.box}
                 icon={item.icon}
-                label={item.label}
+                label={t(boxLabel[item.box] ?? "inbox")}
                 count={item.count ? counts[item.box] : undefined}
                 onNavigate={onNavigate}
               />
@@ -294,7 +297,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
         </div>
 
         {bootstrap.teams.length > 0 && (
-          <Section id="teams" title="Teams">
+          <Section id="teams" title={t("teams")}>
             {bootstrap.teams
               .filter((t) => t.isMember || can("conversations.view_all"))
               .map((t) => (
@@ -315,7 +318,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
         {bootstrap.accounts.length > 0 && (
           <Section
             id="inboxes"
-            title="Inboxes"
+            title={t("inboxes")}
             action={
               (can("inboxes.manage") || can("inboxes.connect_personal")) && (
                 <Link
@@ -358,7 +361,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
         )}
 
         {tree.length > 0 && (
-          <Section id="labels" title="Labels">
+          <Section id="labels" title={t("labels")}>
             {tree.map((l) => renderLabel(l, 0))}
           </Section>
         )}
