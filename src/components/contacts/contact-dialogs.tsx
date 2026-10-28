@@ -83,19 +83,19 @@ function NewContactForm({
         notes: form.notes || null,
         isPrivate,
       })
-      toast.success("Contact added")
+      toast.success(t("contactAdded"))
       onCreated?.(contact)
       onClose()
     } catch (err) {
-      setError(err instanceof ApiClientError || err instanceof Error ? err.message : "Couldn’t save the contact")
+      setError(err instanceof ApiClientError || err instanceof Error ? err.message : t("couldNotSave"))
     }
   }
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <DialogHeader>
-        <DialogTitle>New contact</DialogTitle>
-        <DialogDescription>Add someone to the {isPrivate ? "your private" : "shared"} address book.</DialogDescription>
+        <DialogTitle>{t("newContact")}</DialogTitle>
+        <DialogDescription>{t("addToAddressBook")} ({isPrivate ? t("private") : t("shared")}).</DialogDescription>
       </DialogHeader>
       <div className="grid gap-3">
         <div className="grid gap-1.5">
@@ -108,29 +108,29 @@ function NewContactForm({
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="grid gap-1.5">
-            <Label htmlFor="nc-company">Company</Label>
+          <Label htmlFor="nc-company">{t("company")}</Label>
             <Input id="nc-company" value={form.company} onChange={set("company")} />
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="nc-title">Job title</Label>
+          <Label htmlFor="nc-title">{t("jobTitle")}</Label>
             <Input id="nc-title" value={form.title} onChange={set("title")} />
           </div>
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="nc-phone">Phone</Label>
+          <Label htmlFor="nc-phone">{t("phone")}</Label>
           <Input id="nc-phone" type="tel" value={form.phone} onChange={set("phone")} />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="nc-notes">Notes</Label>
+          <Label htmlFor="nc-notes">{t("notes")}</Label>
           <Textarea id="nc-notes" value={form.notes} onChange={set("notes")} rows={2} />
         </div>
         <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5">
           <span className="flex flex-col">
             <span className="flex items-center gap-1.5 text-[13px] font-medium">
-              <Lock className="size-3.5" /> Private contact
+              <Lock className="size-3.5" /> {t("privateContact")}
             </span>
             <span className="text-xs text-muted-foreground">
-              {canShare ? "Only you can see it." : "You can add private contacts. Shared contacts are managed by admins."}
+              {canShare ? t("onlyYouSee") : t("privateManagedAdmins")}
             </span>
           </span>
           <Switch checked={isPrivate} onCheckedChange={setIsPrivate} disabled={!canShare} aria-label="Private contact" />
@@ -143,11 +143,11 @@ function NewContactForm({
       </div>
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onClose}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button type="submit" disabled={create.isPending || !form.email.trim()}>
           {create.isPending && <Spinner />}
-          Add contact
+          {t("addContact")}
         </Button>
       </DialogFooter>
     </form>
@@ -167,6 +167,7 @@ export function ImportContactsDialog({ slug, open, onOpenChange }: { slug: strin
 }
 
 function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
+  const { t } = useI18n()
   const { can } = useOrg()
   const canShare = can("contacts.manage")
   const { importContacts } = useContactMutations(slug)
@@ -220,8 +221,8 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <DialogHeader>
-        <DialogTitle>Import contacts</DialogTitle>
-        <DialogDescription>Upload a CSV exported from Google Contacts, Outlook, HubSpot or a spreadsheet.</DialogDescription>
+        <DialogTitle>{t("importContacts")}</DialogTitle>
+        <DialogDescription>{t("uploadCsvDescription")}</DialogDescription>
       </DialogHeader>
 
       {!headers.length ? (
@@ -247,8 +248,8 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
           <span className="flex size-10 items-center justify-center rounded-full bg-muted">
             <FileUp className="size-5 text-muted-foreground" />
           </span>
-          <span className="text-sm font-medium">Drop a CSV file here or click to browse</span>
-          <span className="text-xs text-muted-foreground">Needs a header row and an email column · up to 5,000 contacts</span>
+          <span className="text-sm font-medium">{t("dropCsv")}</span>
+          <span className="text-xs text-muted-foreground">{t("csvRequirements")}</span>
         </button>
       ) : (
         <div className="flex min-w-0 flex-col gap-3">
@@ -267,7 +268,7 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
                 setError(null)
               }}
             >
-              Choose another file
+              {t("chooseAnotherFile")}
             </Button>
           </div>
           <div className="max-h-72 overflow-auto rounded-lg border">
@@ -291,7 +292,7 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
                         <SelectContent>
                           {FIELD_OPTIONS.map((f) => (
                             <SelectItem key={f} value={f} className="text-xs">
-                              {f === "skip" ? (extraAsCustom ? "Custom field" : "Don’t import") : FIELD_LABELS[f]}
+                              {f === "skip" ? (extraAsCustom ? t("customField") : t("doNotImport")) : FIELD_LABELS[f]}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -315,17 +316,17 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
-              <span className="text-[13px]">Import unmapped columns as custom fields</span>
+              <span className="text-[13px]">{t("importUnmapped")}</span>
               <Switch checked={extraAsCustom} onCheckedChange={setExtraAsCustom} aria-label="Import unmapped columns as custom fields" />
             </label>
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
-              <span className="text-[13px]">Update contacts that already exist</span>
+              <span className="text-[13px]">{t("updateExisting")}</span>
               <Switch checked={mode === "update"} onCheckedChange={(v) => setMode(v ? "update" : "skip")} aria-label="Update existing contacts" />
             </label>
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 sm:col-span-2">
               <span className="flex flex-col">
-                <span className="text-[13px]">Import as private contacts</span>
-                {!canShare && <span className="text-xs text-muted-foreground">Only admins can import into the shared address book.</span>}
+                <span className="text-[13px]">{t("importPrivate")}</span>
+                {!canShare && <span className="text-xs text-muted-foreground">{t("adminsOnlyShared")}</span>}
               </span>
               <Switch checked={isPrivate} onCheckedChange={setIsPrivate} disabled={!canShare} aria-label="Import as private contacts" />
             </label>
@@ -351,11 +352,11 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
       )}
       <DialogFooter>
         <Button variant="outline" onClick={onClose}>
-          Cancel
+          {t("cancel")}
         </Button>
         <Button onClick={submit} disabled={!contacts.length || importContacts.isPending}>
           {importContacts.isPending ? <Spinner /> : <Upload />}
-          Import {contacts.length ? contacts.length.toLocaleString() : ""} contacts
+          {t("import")} {contacts.length ? contacts.length.toLocaleString() : ""} {t("contactsCount")}
         </Button>
       </DialogFooter>
     </div>

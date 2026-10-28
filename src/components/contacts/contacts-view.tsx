@@ -27,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 import { AreaTopBar } from "@/components/tasks/area-top-bar"
 import { ContactDetail } from "./contact-detail"
 import { ImportContactsDialog, NewContactDialog } from "./contact-dialogs"
@@ -47,6 +48,7 @@ function isTypingTarget(el: EventTarget | null) {
 }
 
 export function ContactsView() {
+  const { t } = useI18n()
   const { org } = useOrg()
   const slug = org.slug
   const router = useRouter()
@@ -175,19 +177,19 @@ export function ContactsView() {
         </Button>
         <Button asChild variant="ghost" size="sm" className="hidden text-muted-foreground sm:inline-flex">
           <a href={exportHref} download>
-            <Download /> Export
+            <Download /> {t("export")}
           </a>
         </Button>
         <Button size="sm" onClick={() => setNewOpen(true)}>
           <Plus />
-          <span className="hidden sm:inline">New contact</span>
+          <span className="hidden sm:inline">{t("newContact")}</span>
         </Button>
       </AreaTopBar>
 
-      <h1 className="sr-only">Contacts</h1>
+      <h1 className="sr-only">{t("contacts")}</h1>
       <div className="flex min-h-0 flex-1">
         {/* Filters (desktop) */}
-        <aside className="scrollbar-thin hidden w-56 shrink-0 overflow-y-auto border-r bg-sidebar/60 lg:block" aria-label="Contact filters">
+        <aside className="scrollbar-thin hidden w-56 shrink-0 overflow-y-auto border-r bg-sidebar/60 lg:block" aria-label={t("filterContacts")}>
           {filterPanel}
         </aside>
 
@@ -201,8 +203,8 @@ export function ContactsView() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Escape" && (setSearch(""), e.currentTarget.blur())}
-                placeholder="Search name, email, company…"
-                aria-label="Search contacts"
+                placeholder={t("searchContacts")}
+                aria-label={t("searchContacts")}
                 className="h-8 w-full rounded-lg border bg-background pr-7 pl-8 text-[13px] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 dark:bg-input/30"
               />
               {search ? (
@@ -219,28 +221,28 @@ export function ContactsView() {
               )}
             </div>
             <Select value={sort} onValueChange={(v) => setSort(v as ContactSort)}>
-              <SelectTrigger size="sm" className="h-8 w-auto shrink-0 text-[13px]" aria-label="Sort contacts">
+              <SelectTrigger size="sm" className="h-8 w-auto shrink-0 text-[13px]" aria-label={t("sortContacts")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent align="end">
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="recent">Recent</SelectItem>
-                <SelectItem value="company">Company</SelectItem>
+                <SelectItem value="name">{t("name")}</SelectItem>
+                <SelectItem value="recent">{t("recent")}</SelectItem>
+                <SelectItem value="company">{t("company")}</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon-sm" className="size-8 lg:hidden" onClick={() => setFiltersOpen(true)} aria-label="Filters">
+            <Button variant="outline" size="icon-sm" className="size-8 lg:hidden" onClick={() => setFiltersOpen(true)} aria-label={t("filters")}>
               <Filter />
             </Button>
           </div>
 
           {hasFilters && (
             <div className="flex shrink-0 flex-wrap items-center gap-1.5 border-b px-3 py-2 text-xs">
-              <span className="text-muted-foreground tabular-nums">{list.isPending ? "…" : total.toLocaleString()} results</span>
-              {scope !== "all" && <FilterChip label={scope === "shared" ? "Shared" : "Private"} onClear={() => setScope("all")} />}
-              {company !== undefined && <FilterChip icon={<Building2 className="size-3" />} label={company || "No company"} onClear={() => setCompany(undefined)} />}
+              <span className="text-muted-foreground tabular-nums">{list.isPending ? "…" : total.toLocaleString()} {t("results")}</span>
+              {scope !== "all" && <FilterChip label={scope === "shared" ? t("shared") : t("private")} onClear={() => setScope("all")} />}
+              {company !== undefined && <FilterChip icon={<Building2 className="size-3" />} label={company || t("noCompany")} onClear={() => setCompany(undefined)} />}
               {tag && <FilterChip icon={<Tag className="size-3" />} label={tag} onClear={() => setTag(undefined)} />}
               <button type="button" onClick={clearFilters} className="ml-auto text-muted-foreground hover:text-foreground">
-                Clear
+                {t("clear")}
               </button>
             </div>
           )}
@@ -251,12 +253,12 @@ export function ContactsView() {
             ) : list.isError ? (
               <Empty className="h-full">
                 <EmptyHeader>
-                  <EmptyTitle>Couldn’t load contacts</EmptyTitle>
-                  <EmptyDescription>Check your connection and try again.</EmptyDescription>
+                  <EmptyTitle>{t("couldNotLoadContacts")}</EmptyTitle>
+                  <EmptyDescription>{t("checkConnectionRetry")}</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button variant="outline" size="sm" onClick={() => list.refetch()}>
-                    Retry
+                    {t("retry")}
                   </Button>
                 </EmptyContent>
               </Empty>
@@ -264,25 +266,25 @@ export function ContactsView() {
               <Empty className="h-full">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">{hasFilters ? <Search /> : <BookUser />}</EmptyMedia>
-                  <EmptyTitle>{hasFilters ? "No matching contacts" : "Your address book is empty"}</EmptyTitle>
+                  <EmptyTitle>{hasFilters ? t("noMatchingContacts") : t("addressBookEmpty")}</EmptyTitle>
                   <EmptyDescription>
                     {hasFilters
-                      ? "Try another search or clear the filters."
-                      : "Contacts are added automatically as you email people. You can also add or import them."}
+                      ? t("tryAnotherSearch")
+                      : t("contactsAutoAdded")}
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent className="flex-row justify-center">
                   {hasFilters ? (
                     <Button variant="outline" size="sm" onClick={clearFilters}>
-                      Clear filters
+                      {t("clearFilters")}
                     </Button>
                   ) : (
                     <>
                       <Button size="sm" onClick={() => setNewOpen(true)}>
-                        <Plus /> New contact
+                        <Plus /> {t("newContact")}
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
-                        <Upload /> Import CSV
+                        <Upload /> {t("importCsv")}
                       </Button>
                     </>
                   )}
@@ -327,9 +329,9 @@ export function ContactsView() {
                 <EmptyMedia variant="icon">
                   <Users />
                 </EmptyMedia>
-                <EmptyTitle>{facets ? `${facets.counts.all.toLocaleString()} contacts` : "Contacts"}</EmptyTitle>
+                <EmptyTitle>{facets ? `${facets.counts.all.toLocaleString()} ${t("contactsCount")}` : t("contacts")}</EmptyTitle>
                 <EmptyDescription>
-                  Select someone to see their details, notes and every conversation you’ve had with them.
+                  {t("selectContactDetails")}
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
@@ -347,8 +349,8 @@ export function ContactsView() {
       <Sheet open={Boolean(isMobile && selectedId)} onOpenChange={(o) => !o && select(null)}>
         <SheetContent side="right" className="w-full gap-0 p-0 sm:max-w-md">
           <SheetHeader className="sr-only">
-            <SheetTitle>Contact</SheetTitle>
-            <SheetDescription>Contact details</SheetDescription>
+            <SheetTitle>{t("contact")}</SheetTitle>
+            <SheetDescription>{t("contactDetails")}</SheetDescription>
           </SheetHeader>
           {isMobile && selectedId && (
             <ContactDetail
@@ -367,17 +369,17 @@ export function ContactsView() {
       <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
         <SheetContent side="left" className="w-72 gap-0 p-0">
           <SheetHeader className="border-b">
-            <SheetTitle>Filters</SheetTitle>
-            <SheetDescription className="sr-only">Filter contacts</SheetDescription>
+            <SheetTitle>{t("filters")}</SheetTitle>
+            <SheetDescription className="sr-only">{t("filterContacts")}</SheetDescription>
           </SheetHeader>
           <div className="min-h-0 flex-1 overflow-y-auto">{filterPanel}</div>
           <div className="safe-bottom flex gap-2 border-t p-3 sm:hidden">
             <Button variant="outline" size="sm" className="flex-1" onClick={() => setImportOpen(true)}>
-              <Upload /> Import
+              <Upload /> {t("import")}
             </Button>
             <Button asChild variant="outline" size="sm" className="flex-1">
               <a href={exportHref} download>
-                <Download /> Export
+                <Download /> {t("export")}
               </a>
             </Button>
           </div>
@@ -470,6 +472,7 @@ function FilterPanel({
   onCompany: (c: string | undefined) => void
   onTag: (t: string | undefined) => void
 }) {
+  const { t } = useI18n()
   const [showAllCompanies, setShowAllCompanies] = useState(false)
   const companies = facets?.companies ?? []
   const visibleCompanies = showAllCompanies ? companies : companies.slice(0, 12)
@@ -481,12 +484,12 @@ function FilterPanel({
   return (
     <div className="flex flex-col gap-4 px-3 py-3">
       <div>
-        <div className="px-2 pb-1.5 font-mono text-[10.5px] font-medium tracking-wider text-muted-foreground/80 uppercase">Address book</div>
+        <div className="px-2 pb-1.5 font-mono text-[10.5px] font-medium tracking-wider text-muted-foreground/80 uppercase">{t("addressBook")}</div>
         {(
           [
-            { v: "all", label: "All contacts", icon: BookUser, n: facets?.counts.all },
-            { v: "shared", label: "Shared", icon: Users, n: facets?.counts.shared },
-            { v: "private", label: "Private", icon: Lock, n: facets?.counts.private },
+            { v: "all", label: t("allContacts"), icon: BookUser, n: facets?.counts.all },
+            { v: "shared", label: t("shared"), icon: Users, n: facets?.counts.shared },
+            { v: "private", label: t("private"), icon: Lock, n: facets?.counts.private },
           ] as const
         ).map((s) => (
           <button key={s.v} type="button" className={item(scope === s.v)} onClick={() => onScope(s.v)} aria-pressed={scope === s.v}>
@@ -498,7 +501,7 @@ function FilterPanel({
       </div>
       {companies.length > 0 && (
         <div>
-          <div className="px-2 pb-1.5 font-mono text-[10.5px] font-medium tracking-wider text-muted-foreground/80 uppercase">Companies</div>
+          <div className="px-2 pb-1.5 font-mono text-[10.5px] font-medium tracking-wider text-muted-foreground/80 uppercase">{t("companies")}</div>
           {visibleCompanies.map((c) => (
             <button
               key={c.name}
