@@ -56,6 +56,7 @@ import { useOrg } from "@/components/app/org-provider"
 import { firstName, memberName, untilLabel } from "@/lib/inbox/format"
 import type { ConversationDetail } from "@/lib/inbox/types"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 import { inboxUI, useInboxUI, type PickerKind } from "@/hooks/inbox/store"
 import { useNow } from "@/hooks/inbox/use-now"
 import { useViewers } from "@/hooks/inbox/use-realtime"
@@ -141,6 +142,7 @@ function Hint({ action }: { action: ShortcutAction }) {
 
 export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: { conv: ConversationDetail; cmd: ConversationCommands; detailsOpen: boolean; onToggleDetails: () => void }) {
   const { account, team, label, member, meId, bootstrap } = useInbox()
+  const { t } = useI18n()
   const { can } = useOrg()
   const hint = useShortcutHint()
   const picker = useInboxUI((s) => s.picker)
@@ -195,7 +197,7 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
               onClick={cmd.toggleStatus}
             >
               {conv.status === "closed" ? <RotateCcw /> : <CircleCheck />}
-              {conv.status === "closed" ? "Reopen" : "Close"}
+              {conv.status === "closed" ? t("reopen") : t("close")}
               {hint("close") && (
                 <Kbd className={cn("ml-0.5 max-lg:hidden", conv.status !== "closed" && "bg-primary-foreground/15 text-primary-foreground/80")}>{hint("close")}</Kbd>
               )}
@@ -231,7 +233,7 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
               </Button>
             </SnoozePicker>
           )}
-          <HeaderButton label={conv.starred ? "Unstar" : "Star"} shortcut={hint("star") ?? undefined} onClick={cmd.toggleStar} active={conv.starred} className="max-sm:hidden">
+          <HeaderButton label={conv.starred ? t("unstar") : t("star")} shortcut={hint("star") ?? undefined} onClick={cmd.toggleStar} active={conv.starred} className="max-sm:hidden">
             <Star className={cn(conv.starred && "fill-amber-400 text-amber-400")} />
           </HeaderButton>
           {bootstrap.teams.length > 0 && writable && (
@@ -251,29 +253,29 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
             <DropdownMenuContent align="end" className="w-60">
               {writable && (
                 <DropdownMenuItem onSelect={cmd.toggleStatus} className="md:hidden">
-                  {conv.status === "closed" ? <RotateCcw /> : <CircleCheck />} {conv.status === "closed" ? "Reopen" : "Close"}
+                  {conv.status === "closed" ? <RotateCcw /> : <CircleCheck />} {conv.status === "closed" ? t("reopen") : t("close")}
                   <Hint action="close" />
                 </DropdownMenuItem>
               )}
               {writable && (
                 <>
                   <DropdownMenuItem className="md:hidden" onSelect={() => setTimeout(() => setPicker("assign"), 0)}>
-                    <UserPlus /> Assign…<Hint action="assign" />
+                    <UserPlus /> {t("assign")}…<Hint action="assign" />
                   </DropdownMenuItem>
                   <DropdownMenuItem className="md:hidden" onSelect={() => setTimeout(() => setPicker("label"), 0)}>
-                    <Tag /> Labels…<Hint action="label" />
+                    <Tag /> {t("labelsAction")}…<Hint action="label" />
                   </DropdownMenuItem>
                   <DropdownMenuItem className="md:hidden" onSelect={() => setTimeout(() => setPicker("snooze"), 0)}>
-                    <Clock /> Snooze…<Hint action="snooze" />
+                    <Clock /> {t("snooze")}…<Hint action="snooze" />
                   </DropdownMenuItem>
                 </>
               )}
               <DropdownMenuItem onSelect={cmd.toggleStar} className="sm:hidden">
-                <Star /> {conv.starred ? "Unstar" : "Star"}
+                <Star /> {conv.starred ? t("unstar") : t("star")}
               </DropdownMenuItem>
               {writable && (
                 <DropdownMenuItem onSelect={cmd.assignToMe}>
-                  <UserPlus /> {conv.assigneeIds.includes(meId) ? "Unassign me" : "Assign to me"}
+                  <UserPlus /> {conv.assigneeIds.includes(meId) ? t("unassignMe") : t("assignMe")}
                   <Hint action="assignMe" />
                 </DropdownMenuItem>
               )}
@@ -284,12 +286,12 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
               )}
               {bootstrap.teams.length > 0 && writable && (
                 <DropdownMenuItem onSelect={() => setTimeout(() => setPicker("team"), 0)}>
-                  <Users /> Move to team…
+                  <Users /> {t("moveToTeam")}…
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={cmd.markUnread}>
-                <Mail /> Mark as unread<Hint action="markUnread" />
+                <Mail /> {t("markUnread")}<Hint action="markUnread" />
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={cmd.togglePin}>
                 {conv.pinned ? <PinOff /> : <Pin />} {conv.pinned ? "Unpin" : "Pin to top"}
@@ -302,7 +304,7 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={cmd.copyLink}>
-                <Copy /> Copy link
+                <Copy /> {t("copyLink")}
               </DropdownMenuItem>
               {writable && conv.kind === "email" && (
                 <DropdownMenuItem onSelect={() => setTimeout(() => setPicker("merge"), 0)}>
@@ -313,7 +315,7 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
                 <Printer /> Print
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={onToggleDetails}>
-                <PanelRight /> {detailsOpen ? "Hide details" : "Show details"}
+                <PanelRight /> {detailsOpen ? t("hideDetails") : t("showDetails")}
               </DropdownMenuItem>
               {writable && (
                 <>
@@ -324,20 +326,20 @@ export function ConversationHeader({ conv, cmd, detailsOpen, onToggleDetails }: 
                   </DropdownMenuItem>
                   {canDelete && (
                     <DropdownMenuItem variant={conv.isTrash ? "default" : "destructive"} onSelect={cmd.toggleTrash}>
-                      {conv.isTrash ? <ArchiveRestore /> : <Trash2 />} {conv.isTrash ? "Restore" : "Move to trash"}
+                      {conv.isTrash ? <ArchiveRestore /> : <Trash2 />} {conv.isTrash ? t("restore") : t("moveToTrash")}
                       <Hint action="trash" />
                     </DropdownMenuItem>
                   )}
                   {canDelete && conv.isTrash && (
-                    <DropdownMenuItem variant="destructive" onSelect={() => setConfirmDelete(true)}>
-                      <Trash2 /> Delete permanently
+              <DropdownMenuItem variant="destructive" onSelect={() => setConfirmDelete(true)}>
+                      <Trash2 /> {t("deleteForever")}
                     </DropdownMenuItem>
                   )}
                 </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-          <HeaderButton label={detailsOpen ? "Hide details" : "Show details"} onClick={onToggleDetails} active={detailsOpen} className="max-md:hidden">
+          <HeaderButton label={detailsOpen ? t("hideDetails") : t("showDetails")} onClick={onToggleDetails} active={detailsOpen} className="max-md:hidden">
             <PanelRight />
           </HeaderButton>
         </div>

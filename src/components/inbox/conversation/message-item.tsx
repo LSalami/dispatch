@@ -20,6 +20,7 @@ import { api } from "@/lib/api-client"
 import { formatAddress, fullTime, memberName, participantName, threadTime, untilLabel } from "@/lib/inbox/format"
 import type { DraftInfo, Participant, ThreadMessage } from "@/lib/inbox/types"
 import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/i18n"
 import { inboxKeys, useMessageBody } from "@/hooks/inbox/queries"
 import { inboxUI } from "@/hooks/inbox/store"
 import { AttachmentList } from "../attachments"
@@ -148,6 +149,7 @@ export function MessageItem({
   onToggle: () => void
   canReply: boolean
 }) {
+  const { t } = useI18n()
   const { account, member, ownAddresses } = useInbox()
   const from: Participant = { name: message.fromName, email: message.fromEmail }
   const author = message.direction === "outbound" && message.authorId ? member(message.authorId) : undefined
@@ -241,11 +243,11 @@ export function MessageItem({
             <>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon-xs" aria-label="Reply" onClick={() => inboxUI.openComposer(conversationId, "reply", { messageId: message.id })}>
+                  <Button variant="ghost" size="icon-xs" aria-label={t("reply")} onClick={() => inboxUI.openComposer(conversationId, "reply", { messageId: message.id })}>
                     <Reply />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Reply</TooltipContent>
+                <TooltipContent>{t("reply")}</TooltipContent>
               </Tooltip>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -255,13 +257,13 @@ export function MessageItem({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onSelect={() => inboxUI.openComposer(conversationId, "reply", { messageId: message.id })}>
-                    <Reply /> Reply
+                    <Reply /> {t("reply")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => inboxUI.openComposer(conversationId, "reply_all", { messageId: message.id })}>
-                    <ReplyAll /> Reply all
+                    <ReplyAll /> {t("replyAll")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => inboxUI.openComposer(conversationId, "forward", { messageId: message.id })}>
-                    <Forward /> Forward
+                    <Forward /> {t("forward")}
                   </DropdownMenuItem>
                   {message.messageId && (
                     <>
