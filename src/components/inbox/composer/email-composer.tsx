@@ -21,6 +21,7 @@ import { EditorContent, EditorToolbar, isEditorEmpty, useEmailEditor } from "./e
 import { RecipientInput } from "./recipient-input"
 import { useEmailDraft, type EmailDraftState } from "./use-email-draft"
 import { useUploads } from "./use-uploads"
+import { useI18n } from "@/lib/i18n"
 
 export type EmailComposerProps = {
   initial: EmailDraftState
@@ -68,6 +69,7 @@ export function EmailComposer({
   onDraftChange,
   saveOnMount = false,
 }: EmailComposerProps) {
+  const { t } = useI18n()
   const { slug, bootstrap, member, meId } = useInbox()
   const { org } = useOrg()
   const uploads = useUploads(slug, bootstrap.settings.maxAttachmentMb, initialAttachments)
@@ -227,7 +229,7 @@ export function EmailComposer({
             id="composer-subject"
             value={draft.subject}
             onChange={(e) => update({ subject: e.target.value })}
-            placeholder="Subject"
+            placeholder={t("subjectPlaceholder")}
             className="h-9 border-0 bg-transparent px-0 text-[13px] shadow-none focus-visible:ring-0 dark:bg-transparent"
           />
         </div>

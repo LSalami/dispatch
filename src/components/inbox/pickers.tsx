@@ -18,6 +18,7 @@ import type { LabelSummary } from "@/lib/inbox/types"
 import { cn } from "@/lib/utils"
 import { useNow } from "@/hooks/inbox/use-now"
 import { useInbox } from "./inbox-provider"
+import { useI18n } from "@/lib/i18n"
 
 type PopoverProps = {
   open: boolean
@@ -44,6 +45,7 @@ export function AssigneePicker({
   side,
 }: PopoverProps & { value: string[]; partial?: string[]; onToggle: (userId: string, assign: boolean) => void }) {
   const { members, meId } = useInbox()
+  const { t } = useI18n()
   const { can } = useOrg()
   const canAssignOthers = can("conversations.assign")
   const sorted = useMemo(() => {
@@ -56,7 +58,7 @@ export function AssigneePicker({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent align={align} side={side} className="w-72 p-0">
         <Command>
-          <CommandInput placeholder="Assign to…" autoFocus />
+          <CommandInput placeholder={t("assignToPlaceholder")} autoFocus />
           <CommandList className="max-h-80">
             <CommandEmpty>No teammates found.</CommandEmpty>
             <CommandGroup heading="Teammates">
@@ -129,6 +131,7 @@ export function LabelPicker({
   side,
 }: PopoverProps & { value: string[]; partial?: string[]; onToggle: (labelId: string, add: boolean) => void }) {
   const { bootstrap, slug } = useInbox()
+  const { t } = useI18n()
   const { can } = useOrg()
   const router = useRouter()
   const flat = useMemo(() => flattenLabels(bootstrap.labels), [bootstrap.labels])
@@ -137,7 +140,7 @@ export function LabelPicker({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent align={align} side={side} className="w-72 p-0">
         <Command>
-          <CommandInput placeholder="Apply labels…" autoFocus />
+          <CommandInput placeholder={t("applyLabelsPlaceholder")} autoFocus />
           <CommandList className="max-h-80">
             <CommandEmpty>No labels found.</CommandEmpty>
             <CommandGroup>
@@ -172,12 +175,13 @@ export function LabelPicker({
 
 export function TeamPicker({ value, onSelect, open, onOpenChange, children, align = "end", side }: PopoverProps & { value: string | null; onSelect: (teamId: string | null) => void }) {
   const { bootstrap } = useInbox()
+  const { t } = useI18n()
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent align={align} side={side} className="w-64 p-0">
         <Command>
-          <CommandInput placeholder="Move to team…" autoFocus />
+          <CommandInput placeholder={t("moveToTeamPlaceholder")} autoFocus />
           <CommandList>
             <CommandEmpty>No teams found.</CommandEmpty>
             <CommandGroup>

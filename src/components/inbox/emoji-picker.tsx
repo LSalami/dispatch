@@ -5,6 +5,7 @@ import { EmojiPicker, type EmojiPickerListCategoryHeaderProps, type EmojiPickerL
 import { LoaderCircle, Search } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useInbox } from "./inbox-provider"
+import { useI18n } from "@/lib/i18n"
 
 export const QUICK_REACTIONS = ["👍", "❤️", "😂", "🎉", "👀", "🙏", "✅", "🔥"]
 
@@ -51,6 +52,7 @@ export function EmojiPickerPopover({
   side?: "top" | "bottom" | "left" | "right"
 }) {
   const { slug } = useInbox()
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const pick = (emoji: string) => {
     onPick(emoji)
@@ -86,7 +88,7 @@ export function EmojiPickerPopover({
               <EmojiPicker.Search
                 autoFocus
                 aria-label="Search emoji"
-                placeholder="Search emoji…"
+                placeholder={t("searchEmojiPlaceholder")}
                 className="h-8 w-full appearance-none rounded-md border border-input bg-transparent pr-2.5 pl-8 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
               />
             </div>

@@ -25,10 +25,12 @@ import { timePresets } from "@/lib/inbox/snooze"
 import type { AccountSummary, CannedResponseItem } from "@/lib/inbox/types"
 import { useInbox } from "../inbox-provider"
 import { DateTimeForm } from "../pickers"
+import { useI18n } from "@/lib/i18n"
 
 /** Searchable canned responses. `onPick` receives the raw response (variables are rendered by the caller). */
 export function ResponsePicker({ onPick }: { onPick: (r: CannedResponseItem) => void }) {
   const { slug } = useInbox()
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const { data = [], isLoading } = useResponses(slug, open)
   return (
@@ -45,7 +47,7 @@ export function ResponsePicker({ onPick }: { onPick: (r: CannedResponseItem) => 
       </Tooltip>
       <PopoverContent align="start" side="top" className="w-[min(24rem,calc(100vw-1rem))] p-0">
         <Command>
-          <CommandInput placeholder="Search responses…" autoFocus />
+          <CommandInput placeholder={t("searchResponsesPlaceholder")} autoFocus />
           <CommandList className="max-h-80">
             {isLoading ? (
               <div className="flex justify-center py-6">

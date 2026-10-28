@@ -149,7 +149,7 @@ function NewChatForm({ onDone, Footer, autoFocus }: { onDone: () => void; Footer
             <Label htmlFor="new-chat-name" className="text-xs text-muted-foreground">
               {t("groupName")} <span className="font-normal">({t("optional")})</span>
             </Label>
-            <Input id="new-chat-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. launch-week" maxLength={80} />
+            <Input id="new-chat-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("groupChatNamePlaceholder")} maxLength={80} />
           </div>
         )}
       </div>

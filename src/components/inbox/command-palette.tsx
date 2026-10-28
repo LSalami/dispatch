@@ -43,6 +43,7 @@ import { useChats, useSearch } from "@/hooks/inbox/queries"
 import { inboxUI, useInboxUI } from "@/hooks/inbox/store"
 import { useShortcutLabel } from "@/hooks/inbox/use-hotkeys"
 import { STATIC_BOX_ICONS } from "./box-info"
+import { useI18n } from "@/lib/i18n"
 import { useInbox } from "./inbox-provider"
 import { useShortcutCombo } from "./shortcut-hint"
 import type { ShortcutAction } from "@/lib/inbox/shortcuts"
@@ -123,6 +124,7 @@ function ResultRow({ item, meId }: { item: ConversationListItem; meId: string })
 /** ⌘K: search conversations, jump to boxes/teams/inboxes/labels/chats, run actions. */
 export function CommandPalette() {
   const { slug, meId, bootstrap, member } = useInbox()
+  const { t } = useI18n()
   const { can } = useOrg()
   const router = useRouter()
   const params = useParams<{ box?: string }>()
@@ -257,7 +259,7 @@ export function CommandPalette() {
           ref={inputRef}
           value={query}
           onValueChange={setQuery}
-          placeholder="Search conversations or type a command…"
+          placeholder={t("searchConversationsPlaceholder")}
           aria-label="Search conversations or commands"
           className="text-[14px]"
         />
