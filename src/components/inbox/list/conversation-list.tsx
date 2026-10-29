@@ -1,10 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { useQueryClient } from "@tanstack/react-query"
 import { ArrowDownUp, Check, ListFilter, Plus, RefreshCw, Search, SearchX, SquarePen } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
@@ -67,6 +68,13 @@ export function ConversationList({ box }: { box: string }) {
   const isSearch = box === "search"
   const isChats = box === "chats"
   const q = isSearch ? (searchParams.get("q") ?? "") : ""
+  const [searchInput, setSearchInput] = useState(q)
+  useEffect(() => setSearchInput(q), [q])
+  const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const next = searchInput.trim()
+    router.push(`/w/${slug}/search${next ? `?q=${encodeURIComponent(next)}` : ""}`)
+  }
   const viewDescription = (() => {
     if (box === "inbox") return locale === "it"
       ? "Email aperte e non posticipate delle tue caselle personali, assegnate a te o seguite da te se non lette. Le email condivise non assegnate sono in Non assegnate."
@@ -250,12 +258,27 @@ export function ConversationList({ box }: { box: string }) {
                 <info.icon className="size-4 shrink-0 text-muted-foreground max-lg:hidden" aria-hidden />
               ))}
               <div className="min-w-0 flex-1">
-                <div className="flex min-w-0 items-center gap-2">
-                  <h1 className="truncate text-[15px] font-semibold tracking-tight">{isSearch ? (q ? `“${q}”` : t("inboxUiSearch")) : info.title}</h1>
-                  {filters.status && filters.status !== "open" && (
-                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 font-mono text-[10.5px] text-muted-foreground uppercase">{filters.status}</span>
-                  )}
-                </div>
+                {isSearch ? (
+                  <form onSubmit={submitSearch} role="search" className="flex min-w-0 items-center gap-2">
+                    <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <Input
+                      type="search"
+                      value={searchInput}
+                      onChange={(event) => setSearchInput(event.target.value)}
+                      placeholder={locale === "it" ? "Cerca mittente, oggetto o contenuto…" : "Search sender, subject, or message…"}
+                      aria-label={locale === "it" ? "Cerca tutte le email" : "Search all email"}
+                      className="h-9 border-0 bg-transparent px-1 text-base shadow-none focus-visible:ring-0 md:text-sm"
+                    />
+                    <Button type="submit" size="sm" className="shrink-0">{locale === "it" ? "Cerca" : "Search"}</Button>
+                  </form>
+                ) : (
+                  <div className="flex min-w-0 items-center gap-2">
+                    <h1 className="truncate text-[15px] font-semibold tracking-tight">{info.title}</h1>
+                    {filters.status && filters.status !== "open" && (
+                      <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 font-mono text-[10.5px] text-muted-foreground uppercase">{filters.status}</span>
+                    )}
+                  </div>
+                )}
                 {!isSearch && viewDescription && <p className="line-clamp-2 text-xs leading-4 text-muted-foreground">{viewDescription}</p>}
               </div>
             </div>
@@ -351,10 +374,7 @@ export function ConversationList({ box }: { box: string }) {
 
         {isSearch && !q.trim() && (
           <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-            <p className="text-sm text-muted-foreground">{locale === "it" ? "Inserisci una ricerca nella barra dei comandi." : "Type a search in the command palette."}</p>
-            <Button variant="outline" size="sm" onClick={() => inboxUI.set({ paletteOpen: true, paletteQuery: "" })}>
-              {locale === "it" ? "Apri la ricerca" : "Open search"}
-            </Button>
+            <p className="text-sm text-muted-foreground">{locale === "it" ? "Cerca per mittente, destinatario, oggetto o testo del messaggio. Puoi anche usare filtri come from: o has:attachment." : "Search by sender, recipient, subject, or message text. You can also use filters like from: or has:attachment."}</p>
           </div>
         )}
 
