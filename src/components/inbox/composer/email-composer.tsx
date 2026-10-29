@@ -240,7 +240,7 @@ export function EmailComposer({
         {draft.signatureId && (
           <div
             className="mx-3 mt-1 border-t border-dashed pt-1 text-[11.5px] leading-tight text-muted-foreground [&_img]:max-h-10 [&_img]:w-auto [&_p]:my-0"
-            dangerouslySetInnerHTML={{ __html: purify(d.signatureHtml(draft.signatureId).replace(/^<div[^>]*><br>/, "<div>").replace(/(?:<br\s*\/?\s*>\s*){2,}/gi, "<br>")) }}
+            dangerouslySetInnerHTML={{ __html: purify(d.signatureHtml(draft.signatureId)) }}
           />
         )}
         {draft.mode !== "new" && (
