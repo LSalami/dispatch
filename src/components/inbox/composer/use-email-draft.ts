@@ -102,6 +102,7 @@ export function useEmailDraft({ initial, saveOnMount = false, attachmentIds, onR
       if (!sig) return ""
       const me = bootstrap.me
       const rendered = renderTemplate(sig.body, { user: { name: me.name, email: me.email, title: me.title }, org: { name: org.name } })
+        .replace(/(?:<br\s*\/?\s*>\s*){2,}/gi, "<br>")
       return `${SIGNATURE_MARKER} data-signature-id="${escapeHtml(sig.id)}">${rendered}</div>`
     },
     [signature, bootstrap.me, org.name]
