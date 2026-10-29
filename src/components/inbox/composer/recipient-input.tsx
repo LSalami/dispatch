@@ -76,10 +76,10 @@ export function RecipientInput({
     <Popover open={open}>
       <PopoverAnchor asChild>
         <div
-          className="flex min-h-9 cursor-text items-start gap-2 border-b px-3 py-1.5"
+          className="flex min-h-9 cursor-text items-start gap-1 border-b px-3 py-1.5"
           onClick={() => inputRef.current?.focus()}
         >
-          <label htmlFor={id} className="mt-1 w-8 shrink-0 text-[13px] text-muted-foreground">
+          <label htmlFor={id} className="mt-1 w-6 shrink-0 text-[13px] text-muted-foreground">
             {label}
           </label>
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
