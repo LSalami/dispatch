@@ -235,8 +235,8 @@ export function EmailComposer({
         </div>
       )}
 
-      <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto", variant === "inline" && (expanded ? "max-h-[60dvh]" : "max-h-[34dvh]"))}>
-        <EditorContent editor={editor} className="flex min-h-0 flex-1 flex-col" />
+      <div className={cn("flex min-h-0 flex-1 flex-col overflow-y-auto [&>div:first-child]:flex [&>div:first-child]:min-h-0 [&>div:first-child]:flex-1 [&>div:first-child]:flex-col", variant === "inline" && (expanded ? "max-h-[60dvh]" : "max-h-[34dvh]"))}>
+        <EditorContent editor={editor} />
         {draft.signatureId && (
           <div
             className="mx-3 mt-1 border-t border-dashed pt-1 text-[11.5px] leading-tight text-muted-foreground [&_img]:max-h-10 [&_img]:w-auto [&_p]:my-0"
