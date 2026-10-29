@@ -67,6 +67,24 @@ export function ConversationList({ box }: { box: string }) {
   const isSearch = box === "search"
   const isChats = box === "chats"
   const q = isSearch ? (searchParams.get("q") ?? "") : ""
+  const viewDescription = (() => {
+    if (box === "inbox") return locale === "it"
+      ? "Email aperte e non posticipate delle tue caselle personali, assegnate a te o seguite da te se non lette. Le email condivise non assegnate sono in Non assegnate."
+      : "Open, unsnoozed mail from your personal inboxes, assigned to you, or followed by you while unread. Unassigned shared mail is under Unassigned."
+    if (box === "unassigned") return locale === "it"
+      ? "Email aperte e non posticipate accessibili al team che non sono ancora assegnate a nessuno."
+      : "Open, unsnoozed email you can access that has not been assigned to anyone."
+    if (box === "all") return locale === "it"
+      ? "Tutte le email accessibili, comprese quelle chiuse o posticipate. Spam e cestino sono nelle rispettive viste."
+      : "All email you can access, including closed and snoozed conversations. Spam and trash have their own views."
+    if (box === "spam") return locale === "it"
+      ? "Email contrassegnate come spam. Puoi ripristinare quelle finite qui per errore."
+      : "Email marked as spam. You can restore messages that ended up here by mistake."
+    if (box === "trash") return locale === "it"
+      ? "Email spostate nel cestino. Puoi ripristinarle o eliminarle definitivamente."
+      : "Email moved to trash. You can restore them or delete them permanently."
+    return info.description
+  })()
 
   const [stored, setStored] = usePersistentState<ListFilters>(`dispatch:filters:${box}`, EMPTY_FILTERS)
   const filters = useMemo<ListFilters>(
@@ -219,22 +237,27 @@ export function ConversationList({ box }: { box: string }) {
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      <header className="flex h-12 shrink-0 items-center gap-1 border-b px-2 pt-[env(safe-area-inset-top)] md:px-3">
+      <header className="flex min-h-12 shrink-0 items-center gap-1 border-b px-2 py-1.5 pt-[max(0.375rem,env(safe-area-inset-top))] md:px-3">
         {selectionMode ? (
           <BulkBar box={box} items={selectedItems} allSelected={allSelected} onSelectAll={() => inboxUI.set({ selected: new Set(ids) })} />
         ) : (
           <>
             <MobileNavButton />
             <div className="flex min-w-0 flex-1 items-center gap-2">
-              {info.color ? (
+              {!isSearch && (info.color ? (
                 <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: info.color }} aria-hidden />
               ) : (
                 <info.icon className="size-4 shrink-0 text-muted-foreground max-lg:hidden" aria-hidden />
-              )}
-              <h1 className="truncate text-[15px] font-semibold tracking-tight">{isSearch ? (q ? `“${q}”` : t("inboxUiSearch")) : info.title}</h1>
-              {filters.status && filters.status !== "open" && (
-                <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 font-mono text-[10.5px] text-muted-foreground uppercase">{filters.status}</span>
-              )}
+              ))}
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-2">
+                  <h1 className="truncate text-[15px] font-semibold tracking-tight">{isSearch ? (q ? `“${q}”` : t("inboxUiSearch")) : info.title}</h1>
+                  {filters.status && filters.status !== "open" && (
+                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 font-mono text-[10.5px] text-muted-foreground uppercase">{filters.status}</span>
+                  )}
+                </div>
+                {!isSearch && viewDescription && <p className="line-clamp-2 text-xs leading-4 text-muted-foreground">{viewDescription}</p>}
+              </div>
             </div>
             {items.length > 0 && !isChats && (
               <Checkbox
