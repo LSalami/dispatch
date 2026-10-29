@@ -145,6 +145,26 @@ export const updatePreferences = action(
   }
 )
 
+const sidebarItem = z.enum(["assigned", "mentions", "starred", "snoozed", "drafts", "scheduled", "sent"])
+const sidebarSection = z.enum(["teams", "inboxes", "labels", "chats"])
+
+export const updateSidebarPreferences = action(
+  z.object({
+    slug,
+    hiddenItems: z.array(sidebarItem).max(7),
+    hiddenSections: z.array(sidebarSection).max(4),
+  }),
+  async ({ slug: s, hiddenItems, hiddenSections }) => {
+    const ctx = await personalAction(s)
+    const next = await mergePreferences(ctx.user.id, (p) => ({
+      ...p,
+      sidebar: { hiddenItems, hiddenSections },
+    }))
+    revalidateWorkspace()
+    return next.sidebar
+  }
+)
+
 export const updateNotificationPreferences = action(
   z.object({
     slug,

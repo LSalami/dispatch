@@ -131,6 +131,10 @@ export type UserPreferences = {
   sendAndArchive?: boolean
   undoSendSeconds?: number
   loadRemoteImages?: "always" | "ask" | "never"
+  sidebar?: {
+    hiddenItems?: string[]
+    hiddenSections?: string[]
+  }
   notifications?: {
     email?: boolean
     desktop?: boolean

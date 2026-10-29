@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import {
   AtSign,
   CalendarClock,
@@ -20,6 +20,7 @@ import {
   Search,
   Send,
   Settings,
+  SlidersHorizontal,
   ShieldAlert,
   SquareCheckBig,
   SquarePen,
@@ -31,6 +32,8 @@ import {
   type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Kbd } from "@/components/ui/kbd"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { UserMenu, WorkspaceSwitcher } from "@/components/app/user-menu"
@@ -47,6 +50,13 @@ import { useI18n } from "@/lib/i18n"
 import { useInbox } from "./inbox-provider"
 import { NotificationsButton } from "./notifications-popover"
 import { useShortcutHint } from "./shortcut-hint"
+import { useServerAction } from "@/components/settings/use-server-action"
+import { updateSidebarPreferences } from "@/server/workspace/actions/personal"
+
+const CUSTOMIZABLE_BOXES = ["assigned", "mentions", "starred", "snoozed", "drafts", "scheduled", "sent"] as const
+type CustomizableBox = (typeof CUSTOMIZABLE_BOXES)[number]
+const CUSTOMIZABLE_SECTIONS = ["teams", "inboxes", "labels", "chats"] as const
+type CustomizableSection = (typeof CUSTOMIZABLE_SECTIONS)[number]
 
 const PRIMARY: { box: string; label: string; icon: LucideIcon; count?: "unread" | "total" }[] = [
   { box: "inbox", label: "Inbox", icon: Inbox, count: "unread" },
@@ -181,6 +191,13 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
   const { slug, bootstrap, member, meId } = useInbox()
   const { can } = useOrg()
   const { t, locale } = useI18n()
+  const [customizeOpen, setCustomizeOpen] = useState(false)
+  const initialSidebarPreferences = bootstrap.me.preferences.sidebar as
+    | { hiddenItems?: CustomizableBox[]; hiddenSections?: CustomizableSection[] }
+    | undefined
+  const [hiddenItems, setHiddenItems] = useState<CustomizableBox[]>(initialSidebarPreferences?.hiddenItems ?? [])
+  const [hiddenSections, setHiddenSections] = useState<CustomizableSection[]>(initialSidebarPreferences?.hiddenSections ?? [])
+  const { pending: savingSidebar, run: saveSidebar } = useServerAction()
   const hint = useShortcutHint()
   const params = useParams<{ box?: string; conversationId?: string }>()
   const current = params.box ? decodeURIComponent(params.box) : ""
@@ -190,8 +207,21 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
   const [showMore, setShowMore] = usePersistentState("dispatch:sidebar:more", false)
   const base = `/w/${slug}`
   const tree = useMemo(() => labelTree(bootstrap.labels), [bootstrap.labels])
-  const moreActive = MORE.some((m) => m.box === current)
+  const hiddenPrimary = PRIMARY.filter((item) => CUSTOMIZABLE_BOXES.includes(item.box as CustomizableBox) && hiddenItems.includes(item.box as CustomizableBox))
+  const moreItems = [...MORE, ...hiddenPrimary]
+  const moreActive = moreItems.some((m) => m.box === current)
   const boxLabel: Record<string, Parameters<typeof t>[0]> = { inbox: "inbox", assigned: "assigned", mentions: "mentions", starred: "starred", snoozed: "snoozed", drafts: "drafts", scheduled: "scheduled", sent: "sent", unassigned: "unassigned", all: "allConversations", closed: "closed", spam: "spam", trash: "trash" }
+
+  const saveSidebarPreferences = (items: CustomizableBox[], sections: CustomizableSection[]) =>
+    saveSidebar(
+      () => updateSidebarPreferences({ slug, hiddenItems: items, hiddenSections: sections }),
+      {
+        onSuccess: () => {
+          setHiddenItems(items)
+          setHiddenSections(sections)
+        },
+      }
+    )
 
   const renderLabel = (l: LabelNode, depth: number): React.ReactNode => (
     <div key={l.id}>
@@ -224,6 +254,19 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             <TooltipContent>{t("less")}</TooltipContent>
           </Tooltip>
         )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={locale === "it" ? "Personalizza barra laterale" : "Customize sidebar"}
+              onClick={() => setCustomizeOpen(true)}
+            >
+              <SlidersHorizontal />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{locale === "it" ? "Personalizza barra laterale" : "Customize sidebar"}</TooltipContent>
+        </Tooltip>
       </div>
 
       <div className="flex shrink-0 gap-1.5 px-2 pb-2">
@@ -261,7 +304,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
 
       <nav aria-label={t("inboxUiMailboxes")} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <div className="flex flex-col gap-px">
-          {PRIMARY.map((item) => (
+          {PRIMARY.filter((item) => !hiddenItems.includes(item.box as CustomizableBox) || current === item.box).map((item) => (
             <NavItem
               key={item.box}
               href={`${base}/${item.box}`}
@@ -283,7 +326,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             {showMore || moreActive ? t("less") : t("more")}
           </button>
           {(showMore || moreActive) &&
-            MORE.map((item) => (
+            moreItems.map((item) => (
               <NavItem
                 key={item.box}
                 href={`${base}/${item.box}`}
@@ -296,7 +339,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             ))}
         </div>
 
-        {bootstrap.teams.length > 0 && (
+        {bootstrap.teams.length > 0 && (!hiddenSections.includes("teams") || current.startsWith("team.")) && (
           <Section id="teams" title={t("teams")}>
             {bootstrap.teams
               .filter((t) => t.isMember || can("conversations.view_all"))
@@ -315,7 +358,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           </Section>
         )}
 
-        {bootstrap.accounts.length > 0 && (
+        {bootstrap.accounts.length > 0 && (!hiddenSections.includes("inboxes") || current.startsWith("inbox.")) && (
           <Section
             id="inboxes"
             title={t("inboxes")}
@@ -360,13 +403,13 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           </Section>
         )}
 
-        {tree.length > 0 && (
+        {tree.length > 0 && (!hiddenSections.includes("labels") || current.startsWith("label.")) && (
           <Section id="labels" title={t("labels")}>
             {tree.map((l) => renderLabel(l, 0))}
           </Section>
         )}
 
-        <Section
+        {(!hiddenSections.includes("chats") || current === "chats") && <Section
           id="chats"
           title={t("inboxUiChats")}
           action={
@@ -413,7 +456,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
               </Link>
             )
           })}
-        </Section>
+        </Section>}
       </nav>
 
       <div className="flex shrink-0 items-center gap-0.5 border-t border-sidebar-border px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
@@ -450,6 +493,108 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           <TooltipContent>{t("inboxUiSettings")}</TooltipContent>
         </Tooltip>
       </div>
+
+      <Dialog open={customizeOpen} onOpenChange={setCustomizeOpen}>
+        <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{locale === "it" ? "Personalizza la barra laterale" : "Customize your sidebar"}</DialogTitle>
+            <DialogDescription>
+              {locale === "it"
+                ? "Scegli cosa tenere in vista. Le voci di navigazione nascoste restano sotto Altro; le sezioni si possono riattivare qui. La scelta si sincronizza con il tuo account."
+                : "Choose what to keep in view. Hidden items remain available under More, and your choices sync with your account."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <section className="space-y-1" aria-labelledby="sidebar-items-heading">
+            <h3 id="sidebar-items-heading" className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              {locale === "it" ? "Voci principali" : "Main navigation"}
+            </h3>
+            <p className="mb-2 text-xs text-muted-foreground">
+              {locale === "it" ? "La Posta in arrivo resta sempre visibile." : "Inbox always stays visible."}
+            </p>
+            {PRIMARY.map((item) => {
+              const customizable = CUSTOMIZABLE_BOXES.includes(item.box as CustomizableBox)
+              const visible = !hiddenItems.includes(item.box as CustomizableBox)
+              const id = `sidebar-item-${item.box}`
+              return (
+                <div key={item.box} className="flex items-center justify-between gap-4 rounded-md px-2 py-2 hover:bg-muted/50">
+                  <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer text-[13px] font-medium">
+                    {t(boxLabel[item.box] ?? "inbox")}
+                  </label>
+                  <Switch
+                    id={id}
+                    checked={visible}
+                    disabled={!customizable || savingSidebar}
+                    aria-label={locale === "it" ? `Mostra ${t(boxLabel[item.box] ?? "inbox")}` : `Show ${t(boxLabel[item.box] ?? "inbox")}`}
+                    onCheckedChange={(checked) => {
+                      if (!customizable) return
+                      const next = checked
+                        ? hiddenItems.filter((box) => box !== item.box)
+                        : [...hiddenItems, item.box as CustomizableBox]
+                      void saveSidebarPreferences(next, hiddenSections)
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </section>
+
+          <section className="space-y-1 border-t pt-4" aria-labelledby="sidebar-sections-heading">
+            <h3 id="sidebar-sections-heading" className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              {locale === "it" ? "Sezioni" : "Sections"}
+            </h3>
+            <p className="mb-2 text-xs text-muted-foreground">
+              {locale === "it" ? "Le sezioni nascoste spariscono dalla barra, ma puoi riattivarle da qui." : "Hidden sections disappear from the sidebar, but you can turn them back on here."}
+            </p>
+            {CUSTOMIZABLE_SECTIONS.map((section) => {
+              const labels: Record<CustomizableSection, string> = {
+                teams: t("teams"),
+                inboxes: t("inboxes"),
+                labels: t("labels"),
+                chats: t("inboxUiChats"),
+              }
+              const visible = !hiddenSections.includes(section)
+              const id = `sidebar-section-${section}`
+              return (
+                <div key={section} className="flex items-center justify-between gap-4 rounded-md px-2 py-2 hover:bg-muted/50">
+                  <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer text-[13px] font-medium">
+                    {labels[section]}
+                  </label>
+                  <Switch
+                    id={id}
+                    checked={visible}
+                    disabled={savingSidebar}
+                    aria-label={locale === "it" ? `Mostra sezione ${labels[section]}` : `Show ${labels[section]} section`}
+                    onCheckedChange={(checked) => {
+                      const next = checked
+                        ? hiddenSections.filter((entry) => entry !== section)
+                        : [...hiddenSections, section]
+                      void saveSidebarPreferences(hiddenItems, next)
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </section>
+
+          <div className="flex items-center justify-between gap-3 border-t pt-3">
+            <p className="text-xs text-muted-foreground">
+              {savingSidebar
+                ? (locale === "it" ? "Salvataggio…" : "Saving…")
+                : (locale === "it" ? "Le modifiche vengono salvate automaticamente." : "Changes are saved automatically.")}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={savingSidebar || (hiddenItems.length === 0 && hiddenSections.length === 0)}
+              onClick={() => void saveSidebarPreferences([], [])}
+            >
+              {locale === "it" ? "Ripristina" : "Reset"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
