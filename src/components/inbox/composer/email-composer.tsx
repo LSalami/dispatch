@@ -239,7 +239,7 @@ export function EmailComposer({
         <EditorContent editor={editor} />
         {draft.signatureId && (
           <div
-            className="mx-3 mb-2 border-t border-dashed pt-2 text-[12.5px] text-muted-foreground [&_img]:max-h-16 [&_p]:my-0"
+            className="mx-3 mt-1 border-t border-dashed pt-1 text-[11.5px] leading-tight text-muted-foreground [&_img]:max-h-10 [&_img]:w-auto [&_p]:my-0"
             dangerouslySetInnerHTML={{ __html: purify(d.signatureHtml(draft.signatureId).replace(/^<div[^>]*><br>/, "<div>")) }}
           />
         )}
