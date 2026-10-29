@@ -172,7 +172,7 @@ export function FromSelect({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex min-w-0 items-center gap-1 rounded px-1 text-left text-[13px] outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex min-w-0 max-w-56 items-center gap-1 rounded px-1 text-left text-[13px] outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring max-sm:max-w-[42vw]"
           aria-label={t("inboxUiSendFrom")}
         >
           {current && <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: current.color }} />}
