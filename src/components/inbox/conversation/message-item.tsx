@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { AlertCircle, CalendarClock, ChevronDown, Ellipsis, Forward, ImageOff, Paperclip, Reply, ReplyAll, Send, Undo2 } from "lucide-react"
+import { AlertCircle, CalendarClock, ChevronDown, Ellipsis, Forward, ImageOff, Inbox, Paperclip, Reply, ReplyAll, Send, Undo2 } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,6 +34,27 @@ function AddressList({ label, list }: { label: string; list: Participant[] }) {
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="min-w-0 break-words">{list.map(formatAddress).join(", ")}</dd>
     </>
+  )
+}
+
+function MessageDirectionBadge({ direction, compact = false }: { direction: ThreadMessage["direction"]; compact?: boolean }) {
+  const { t } = useI18n()
+  const outbound = direction === "outbound"
+  const label = t(outbound ? "messageSent" : "messageReceived")
+  const Icon = outbound ? Send : Inbox
+  return (
+    <span
+      title={label}
+      role={compact ? "img" : undefined}
+      aria-label={compact ? label : undefined}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium leading-none",
+        outbound ? "border-brand/30 bg-brand-soft text-brand-foreground" : "border-info/30 bg-info/10 text-info"
+      )}
+    >
+      <Icon className="size-3" aria-hidden="true" />
+      {!compact && label}
+    </span>
   )
 }
 
@@ -168,11 +189,17 @@ export function MessageItem({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-3 rounded-xl border bg-card px-4 py-2.5 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
+        className={cn(
+          "flex w-full items-center gap-3 rounded-xl border border-l-4 px-4 py-2.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+          message.direction === "outbound"
+            ? "border-l-brand bg-brand-soft/25 hover:bg-brand-soft/50"
+            : "border-l-info bg-info/5 hover:bg-info/10"
+        )}
         aria-expanded={false}
       >
         <UserAvatar name={author?.name ?? from.name} email={author?.email ?? from.email} src={author?.avatarUrl} size="sm" />
         <span className="w-36 shrink-0 truncate text-[13px] font-medium max-sm:w-24">{participantName(from)}</span>
+        <MessageDirectionBadge direction={message.direction} compact />
         <span className="min-w-0 flex-1 truncate text-[13px] text-muted-foreground">{message.snippet}</span>
         {hasFiles && <Paperclip className="size-3.5 shrink-0 text-muted-foreground" />}
         <time className="shrink-0 font-mono text-[11px] text-muted-foreground" dateTime={message.date}>
@@ -183,7 +210,13 @@ export function MessageItem({
   }
 
   return (
-    <article className="rounded-xl border bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)]" aria-label={t("messageFrom").replace("{name}", participantName(from))}>
+    <article
+      className={cn(
+        "rounded-xl border border-l-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]",
+        message.direction === "outbound" ? "border-l-brand bg-brand-soft/20" : "border-l-info bg-info/5"
+      )}
+      aria-label={t("messageFrom").replace("{name}", participantName(from))}
+    >
       <header className="flex items-start gap-3 px-4 pt-3 pb-2">
         <button type="button" onClick={onToggle} aria-label={t("messageCollapse")} className="mt-0.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <UserAvatar name={author?.name ?? from.name} email={author?.email ?? from.email} src={author?.avatarUrl} size="md" />
@@ -191,6 +224,7 @@ export function MessageItem({
         <div className="min-w-0 flex-1 cursor-pointer" onClick={onToggle}>
           <div className="flex flex-wrap items-baseline gap-x-2">
             <span className="text-[13.5px] font-semibold">{participantName(from)}</span>
+            <MessageDirectionBadge direction={message.direction} />
             {from.name && <span className="truncate text-xs text-muted-foreground">{from.email}</span>}
             {author && <span className="text-xs text-muted-foreground">· {t("messageSentBy")} {memberName(author)}</span>}
           </div>
