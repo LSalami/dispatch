@@ -1,3 +1,5 @@
+"use client"
+
 import { ArrowDownRight, ArrowUpRight, Minus, Sparkles } from "lucide-react"
 import { MicroLabel } from "@/components/settings/settings-ui"
 import { computeDelta, formatCount, formatDuration, type Delta } from "@/components/analytics/format"

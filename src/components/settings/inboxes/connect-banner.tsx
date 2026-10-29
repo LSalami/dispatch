@@ -1,3 +1,5 @@
+"use client"
+
 import { AlertTriangle, CheckCircle2 } from "lucide-react"
 import { useI18n, localizeError } from "@/lib/i18n"
 
