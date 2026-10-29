@@ -102,7 +102,7 @@ export function useEmailEditor({
       // eslint-disable-next-line react-hooks/refs
       ...fileProps(() => cb.current.onFiles),
       attributes: {
-        class: cn(PROSE, PLACEHOLDER, "min-h-[120px] px-3 py-2.5 outline-none max-md:min-h-[40dvh]"),
+        class: cn(PROSE, PLACEHOLDER, "min-h-[120px] px-3 py-2.5 outline-none max-sm:min-h-[40dvh]"),
         "aria-label": t("inboxUiMessageBody"),
         role: "textbox",
         "aria-multiline": "true",
