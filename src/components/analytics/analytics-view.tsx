@@ -62,7 +62,7 @@ export function AnalyticsView({
   today: string
   children: React.ReactNode
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
   const pathname = usePathname()
   const [pending, startTransition] = useTransition()
@@ -119,8 +119,8 @@ export function AnalyticsView({
             className="bg-card"
           >
             {(["7", "30", "90"] as const).map((r) => (
-              <ToggleGroupItem key={r} value={r} className="h-8 px-3 font-mono text-xs" aria-label={`Last ${r} days`}>
-                {r}D
+              <ToggleGroupItem key={r} value={r} className="h-8 px-3 font-mono text-xs" aria-label={t("analyticsLastDays").replace("{days}", r)}>
+                {r}{locale === "it" ? "g" : "D"}
               </ToggleGroupItem>
             ))}
             <CustomRange
@@ -132,7 +132,7 @@ export function AnalyticsView({
             />
           </ToggleGroup>
           <span className="text-[13px] text-muted-foreground tabular-nums">
-            {formatRangeLabel(filters.from, addDaysYmd(filters.to, 1))}
+            {formatRangeLabel(filters.from, addDaysYmd(filters.to, 1), locale)}
           </span>
           {pending && <Loader2 className="size-3.5 animate-spin text-muted-foreground" aria-label={t("updating")} />}
         </div>
@@ -162,7 +162,7 @@ export function AnalyticsView({
             value={filters.user}
             onChange={(v) => navigate({ user: v })}
             placeholder={t("allTeammates")}
-            searchPlaceholder="Search teammates…"
+            searchPlaceholder={t("analyticsSearchTeammates")}
             clearable
             className="bg-card lg:w-48"
           />
@@ -198,6 +198,7 @@ function CustomRange({
   today: string
   onApply: (from: string, to: string) => void
 }) {
+  const { t } = useI18n()
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const [range, setRange] = useState<DateRange | undefined>({ from: parseYmd(from), to: parseYmd(to) })
@@ -223,7 +224,7 @@ function CustomRange({
           )}
         >
           <CalendarRange className="size-3.5" />
-          Custom
+          {t("analyticsCustom")}
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-0">
@@ -239,11 +240,11 @@ function CustomRange({
         />
         <div className="flex items-center justify-between gap-3 border-t px-3 py-2.5">
           <span className="text-xs text-muted-foreground tabular-nums">
-            {range?.from && range.to ? `${days} ${days === 1 ? "day" : "days"}` : "Pick a start and end date"}
+            {range?.from && range.to ? `${days} ${t(days === 1 ? "analyticsDay" : "analyticsDays")}` : t("analyticsPickDateRange")}
           </span>
           <div className="flex gap-1.5">
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               size="sm"
@@ -254,7 +255,7 @@ function CustomRange({
                 setOpen(false)
               }}
             >
-              Apply
+              {t("analyticsApply")}
             </Button>
           </div>
         </div>

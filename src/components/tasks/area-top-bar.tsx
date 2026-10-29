@@ -14,7 +14,7 @@ import { useI18n } from "@/lib/i18n"
  */
 export function AreaTopBar({ children }: { children?: React.ReactNode }) {
   const { org } = useOrg()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const pathname = usePathname()
   const base = `/w/${org.slug}`
   const areas = [
@@ -33,7 +33,7 @@ export function AreaTopBar({ children }: { children?: React.ReactNode }) {
       </Link>
       <span className="hidden h-4 w-px bg-border sm:block" aria-hidden />
       <WorkspaceSwitcher className="hidden max-w-56 min-w-0 md:flex" />
-      <nav aria-label="Area" className="flex items-center gap-0.5 rounded-lg bg-muted/70 p-0.5 md:ml-1">
+      <nav aria-label={locale === "it" ? "Sezione" : "Area"} className="flex items-center gap-0.5 rounded-lg bg-muted/70 p-0.5 md:ml-1">
         {areas.map((a) => {
           const active = pathname.startsWith(a.href)
           return (

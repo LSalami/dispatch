@@ -18,7 +18,7 @@ import { useI18n } from "@/lib/i18n"
  */
 export function SettingsShell({ children }: { children: React.ReactNode }) {
   const { org, can } = useOrg()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const pathname = usePathname()
   const router = useRouter()
   const base = `/w/${org.slug}/settings`
@@ -42,7 +42,7 @@ export function SettingsShell({ children }: { children: React.ReactNode }) {
           </Link>
           <WorkspaceSwitcher className="mt-1" />
         </div>
-        <nav aria-label="Settings" className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-4">
+        <nav aria-label={locale === "it" ? "Impostazioni" : "Settings"} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-3 pt-2 pb-4">
           {groups.map((g) => (
             <div key={g.label} className="mb-4">
               <div className="px-2 pb-1.5 font-mono text-[10.5px] font-medium tracking-wider text-muted-foreground/80 uppercase">

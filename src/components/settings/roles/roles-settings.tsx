@@ -20,7 +20,7 @@ import { RoleEditor, type RoleEditorTarget } from "@/components/settings/roles/r
 import { deleteRoleAction } from "@/server/workspace/actions/roles"
 import type { RoleRow, RolesPageData } from "@/server/workspace/queries/roles"
 import { ALL_PERMISSIONS } from "@/lib/permissions"
-import { useI18n } from "@/lib/i18n"
+import { localizeRoleName, useI18n } from "@/lib/i18n"
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
@@ -31,7 +31,7 @@ function Tag({ children }: { children: React.ReactNode }) {
 }
 
 export function RolesSettings({ slug, data }: { slug: string; data: RolesPageData }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { roles, isOwner, grantable } = data
   const [editor, setEditor] = useState<RoleEditorTarget>(null)
   const [deleting, setDeleting] = useState<RoleRow | null>(null)
@@ -49,7 +49,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
           <ColorDot color={r.color ?? "#64748b"} className="mt-1.5" />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[13px] font-semibold">{r.name}</span>
+              <span className="text-[13px] font-semibold">{localizeRoleName(r.key, r.name, locale)}</span>
               {r.isSystem && <Tag>{t("roleSystem")}</Tag>}
               {r.isDefault && <Tag>{t("roleDefault")}</Tag>}
               {r.isYours && <Tag>{t("roleYour")}</Tag>}
@@ -62,7 +62,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
           </div>
         </div>
         <div className="flex items-center gap-3 pl-5 sm:pl-0">
-          <div className="flex items-center gap-2" title={pluralize(r.memberCount, "member")}>
+          <div className="flex items-center gap-2" title={`${r.memberCount} ${r.memberCount === 1 ? t("memMemberCount") : t("memMembersCount")}`}>
             {r.sampleMembers.length > 0 && (
               <div className="flex -space-x-1.5">
                 {r.sampleMembers.slice(0, 4).map((m) => (
@@ -71,7 +71,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
               </div>
             )}
             <span className="text-xs whitespace-nowrap text-muted-foreground tabular-nums">
-              {pluralize(r.memberCount, "member")}
+              {r.memberCount} {r.memberCount === 1 ? t("memMemberCount") : t("memMembersCount")}
               {r.pendingInvitations > 0 && ` · ${r.pendingInvitations} ${t("roleInvited")}`}
             </span>
           </div>
@@ -90,7 +90,7 @@ export function RolesSettings({ slug, data }: { slug: string; data: RolesPageDat
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm" aria-label={`More actions for ${r.name}`}>
+                <Button variant="ghost" size="icon-sm" aria-label={`${t("roleMoreActions")} ${localizeRoleName(r.key, r.name, locale)}`}>
                   <MoreHorizontal />
                 </Button>
               </DropdownMenuTrigger>
@@ -181,7 +181,7 @@ function DeleteRoleDialog({
   isOwner: boolean
   onClose: () => void
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const inUse = !!role && role.memberCount + role.pendingInvitations > 0
   const options = roles.filter(
     (r) =>
@@ -218,7 +218,7 @@ function DeleteRoleDialog({
                 {options.map((r) => (
                   <SelectItem key={r.id} value={r.id}>
                     <ColorDot color={r.color ?? "#64748b"} className="size-2" />
-                    {r.name}
+                    {localizeRoleName(r.key, r.name, locale)}
                   </SelectItem>
                 ))}
               </SelectContent>

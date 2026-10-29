@@ -50,7 +50,7 @@ export function ConversationComposer({
 }) {
   const conv = thread.conversation
   const { bootstrap, meId, ownAddresses, member } = useInbox()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const hint = useShortcutHint()
   const isMobile = useIsMobile()
   const [email, setEmail] = useState<{ mode: ReplyMode; key: number; draft?: DraftInfo; messageId?: string; carry?: EmailDraftState } | null>(null)
@@ -253,7 +253,7 @@ export function ConversationComposer({
         <Drawer open={commentOpen} onOpenChange={setCommentOpen} repositionInputs={false}>
           <DrawerContent className="p-0">
             <DrawerTitle className="px-4 pt-2 text-sm">{t("internalComment")}</DrawerTitle>
-            <DrawerDescription className="px-4 text-xs">Only teammates can see comments. @mention to notify.</DrawerDescription>
+            <DrawerDescription className="px-4 text-xs">{t("inboxUiOnlyTeammates")}</DrawerDescription>
             <div className="p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-comment-box>
               <CommentBox conversationId={conv.id} variant="sheet" autoFocus onActivity={() => activity("comment")} onSent={() => setCommentOpen(false)} />
             </div>
@@ -276,8 +276,8 @@ export function ConversationComposer({
         {canReply && (
           <div className="flex shrink-0 items-center gap-1 pb-1">
             {myDraft ? (
-                <Button variant="outline" size="sm" onClick={() => openEmail("reply")} className="border-red-500/30 text-red-600 hover:text-red-600 dark:text-red-400">
-                <FilePen /> {myDraft.authorId === meId ? t("draft") : `${firstName(member(myDraft.authorId))}'s ${t("draft").toLowerCase()}`}
+              <Button variant="outline" size="sm" onClick={() => openEmail("reply")} className="border-red-500/30 text-red-600 hover:text-red-600 dark:text-red-400">
+                <FilePen /> {myDraft.authorId === meId ? t("draft") : `${locale === "it" ? "Bozza di" : `${firstName(member(myDraft.authorId))}'s`} ${t("draft").toLowerCase()}`}
               </Button>
             ) : (
               <Button variant="outline" size="sm" onClick={() => openEmail("reply")}>
@@ -286,7 +286,7 @@ export function ConversationComposer({
             )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon-sm" aria-label="More reply options">
+                <Button variant="outline" size="icon-sm" aria-label={locale === "it" ? "Altre opzioni di risposta" : "More reply options"}>
                   <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>

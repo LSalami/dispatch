@@ -87,7 +87,8 @@ export function EmailDeliveryFields({
   defaultFromEmail?: string
   fieldErrors?: Record<string, string>
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const it = locale === "it"
   const err = (k: string) => fieldErrors?.[k] ?? fieldErrors?.[`values.${k}`] ?? fieldErrors?.[`config.${k}`]
   return (
     <div className="grid gap-5">
@@ -112,14 +113,13 @@ export function EmailDeliveryFields({
       {value.provider === "log" && (
         <div className="rounded-lg border border-dashed border-border bg-surface/60 p-4 text-[13px] leading-relaxed text-muted-foreground">
           {t("emailNotDelivered")} {" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-[12px] text-foreground">docker compose logs -f app</code>. Anyone
-          who needs to sign in will need you to relay their code, so configure a provider before inviting your team.
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-[12px] text-foreground">docker compose logs -f app</code>. {it ? "Chi deve accedere avrà bisogno che tu gli comunichi il codice: configura un provider prima di invitare il team." : "Anyone who needs to sign in will need you to relay their code, so configure a provider before inviting your team."}
         </div>
       )}
 
       {value.provider === "ses" && (
         <div className="grid gap-4 sm:grid-cols-2">
-          <FieldRow label={t("awsRegion")} htmlFor="email-ses-region" hint="The region where your SES identity is verified.">
+          <FieldRow label={t("awsRegion")} htmlFor="email-ses-region" hint={it ? "La regione in cui è verificata la tua identità SES." : "The region where your SES identity is verified."}>
             <Select value={value.sesRegion} onValueChange={(sesRegion) => onChange({ sesRegion })}>
               <SelectTrigger id="email-ses-region" className="w-full">
                 <SelectValue />
@@ -133,7 +133,7 @@ export function EmailDeliveryFields({
               </SelectContent>
             </Select>
           </FieldRow>
-          <FieldRow label="Port" htmlFor="email-ses-port" hint="587 uses STARTTLS, 465 uses implicit TLS.">
+          <FieldRow label={it ? "Porta" : "Port"} htmlFor="email-ses-port" hint={it ? "La porta 587 usa STARTTLS, la 465 usa TLS implicito." : "587 uses STARTTLS, 465 uses implicit TLS."}>
             <Select
               value={String(value.port === 465 ? 465 : value.port === 2587 ? 2587 : 587)}
               onValueChange={(p) => onChange({ port: Number(p), secure: p === "465" })}
@@ -153,7 +153,7 @@ export function EmailDeliveryFields({
             htmlFor="email-user"
             hint={
               <>
-                Create SMTP credentials in the SES console → <em>SMTP settings</em>. These are not your AWS access keys.
+                {it ? "Crea le credenziali SMTP nella console SES → " : "Create SMTP credentials in the SES console → "}<em>SMTP settings</em>{it ? ". Non sono le chiavi di accesso AWS." : ". These are not your AWS access keys."}
               </>
             }
           >

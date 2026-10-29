@@ -69,7 +69,7 @@ export function PreferencesForm({
 
   const save = () =>
     run(() => updatePreferences({ slug, ...form }), {
-      success: "Preferences saved",
+      success: t("prefSaved"),
       onSuccess: () => setSaved(form),
     })
 
@@ -80,7 +80,7 @@ export function PreferencesForm({
 
   return (
     <>
-      <SettingsSection title={t("appearance")} description="Theme and density apply to this device right away and follow you everywhere once saved.">
+      <SettingsSection title={t("appearance")} description={t("prefAppearanceDescription")}>
         <div className="flex flex-col gap-6">
           <OptionCards
             label={t("theme")}
@@ -101,8 +101,8 @@ export function PreferencesForm({
             value={form.density}
             onChange={(v) => set("density", v)}
             options={[
-              { value: "comfortable", label: t("comfortable"), description: "Two-line previews with more breathing room." },
-              { value: "compact", label: t("compact"), description: "Single-line rows — see more conversations at once." },
+              { value: "comfortable", label: t("comfortable"), description: t("prefComfortableDescription") },
+              { value: "compact", label: t("compact"), description: t("prefCompactDescription") },
             ]}
           />
         </div>
@@ -110,7 +110,7 @@ export function PreferencesForm({
 
       <SettingsSection title={t("language")} description={t("languageHelp")}>
         <OptionCards
-          label="Interface language"
+          label={t("prefLanguageLabel")}
           value={form.locale}
           onChange={(v) => set("locale", v)}
           options={[
@@ -124,7 +124,7 @@ export function PreferencesForm({
         <SettingsRows>
           <SettingsRow
             label={t("undoSend")}
-            description="Delay outgoing emails so you can cancel them. Scheduled messages aren't affected."
+            description={t("prefUndoSendDescription")}
             htmlFor="undo-send"
           >
             <Select
@@ -147,7 +147,7 @@ export function PreferencesForm({
           </SettingsRow>
           <SettingsRow
             label={t("sendArchive")}
-            description="Close the conversation when you send a reply, so your inbox stays clear."
+            description={t("prefSendArchiveDescription")}
             htmlFor="send-archive"
           >
             <Switch id="send-archive" checked={form.sendAndArchive} onCheckedChange={(v) => set("sendAndArchive", v)} />
@@ -157,8 +157,8 @@ export function PreferencesForm({
             htmlFor="remote-images"
             description={
               instanceRemoteImages === "never"
-                ? "Your administrator blocks remote images in emails on this instance."
-                : "Remote images can reveal when and where you opened an email (tracking pixels)."
+                ? t("prefRemoteImagesBlocked")
+                : t("prefRemoteImagesDescription")
             }
           >
             <Select
@@ -170,16 +170,16 @@ export function PreferencesForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="always">Always load</SelectItem>
-                <SelectItem value="ask">Ask for each email</SelectItem>
-                <SelectItem value="never">Never load</SelectItem>
+                <SelectItem value="always">{t("prefAlwaysLoad")}</SelectItem>
+                <SelectItem value="ask">{t("prefAskEachEmail")}</SelectItem>
+                <SelectItem value="never">{t("prefNeverLoad")}</SelectItem>
               </SelectContent>
             </Select>
           </SettingsRow>
         </SettingsRows>
       </SettingsSection>
 
-      <SettingsSection title={t("keyboardShortcuts")} description="Fly through your inbox without touching the mouse.">
+      <SettingsSection title={t("keyboardShortcuts")} description={t("prefKeyboardDescription")}>
         <OptionCards
           label={t("keyboardShortcuts")}
           value={form.shortcuts}
@@ -189,15 +189,15 @@ export function PreferencesForm({
               value: "dispatch",
               label: "Dispatch",
               icon: <Keyboard />,
-              description: "Single keys — N to compose, / to search, G then I for the inbox.",
+              description: t("prefDispatchKeys"),
             },
-            { value: "gmail", label: "Gmail-style", icon: <Keyboard />, description: "Key bindings familiar from Gmail." },
-            { value: "off", label: "Off", description: "Only standard browser shortcuts." },
+            { value: "gmail", label: "Gmail", icon: <Keyboard />, description: t("prefGmailKeys") },
+            { value: "off", label: t("off"), description: t("prefOffKeys") },
           ]}
         />
         {form.shortcuts !== "off" && (
           <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            Press <Kbd>?</Kbd> anywhere in the inbox to see all shortcuts.
+            {t("prefPressHelp")} <Kbd>?</Kbd> {t("prefShortcutHint")}
           </p>
         )}
       </SettingsSection>

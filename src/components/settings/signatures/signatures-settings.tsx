@@ -125,7 +125,7 @@ export function SignaturesSettings({
   previewUser: PreviewUser
   canManageWorkspace: boolean
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [editing, setEditing] = useState<SignatureDraft | null>(null)
   const [deleting, setDeleting] = useState<SignatureItem | null>(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -257,14 +257,14 @@ export function SignaturesSettings({
         title={`Delete “${deleting?.name ?? ""}”?`}
         description={
           deleting?.accountIds.length
-            ? `It is the default signature of ${deleting.accountIds.length} inbox${deleting.accountIds.length === 1 ? "" : "es"}; they will have no default signature. This can't be undone.`
-            : "This can't be undone."
+            ? (locale === "it" ? `È la firma predefinita di ${deleting.accountIds.length} caselle: non avranno più una firma predefinita. Questa azione non può essere annullata.` : `It is the default signature of ${deleting.accountIds.length} inbox${deleting.accountIds.length === 1 ? "" : "es"}; they will have no default signature. This can't be undone.`)
+            : (locale === "it" ? "Questa azione non può essere annullata." : "This can't be undone.")
         }
-        confirmLabel="Delete signature"
+        confirmLabel={locale === "it" ? "Elimina firma" : "Delete signature"}
         destructive
         onConfirm={async () => {
           if (!deleting) return
-          const res = await run(() => deleteSignature({ slug, id: deleting.id }), { success: "Signature deleted" })
+          const res = await run(() => deleteSignature({ slug, id: deleting.id }), { success: locale === "it" ? "Firma eliminata" : "Signature deleted" })
           return res.ok
         }}
       />

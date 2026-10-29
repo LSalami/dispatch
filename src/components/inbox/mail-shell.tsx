@@ -17,6 +17,7 @@ import type { Bootstrap } from "@/lib/inbox/types"
 import { InboxProvider, useInbox } from "./inbox-provider"
 import { ResizeHandle } from "./resize-handle"
 import { Sidebar } from "./sidebar"
+import { useI18n } from "@/lib/i18n"
 
 const CommandPalette = dynamic(() => import("./command-palette").then((m) => m.CommandPalette), { ssr: false })
 const ComposeDialog = dynamic(() => import("./compose-dialog").then((m) => m.ComposeDialog), { ssr: false })
@@ -40,6 +41,7 @@ export function MailShell({ slug, bootstrap, children }: { slug: string; bootstr
 
 function ShellInner({ children }: { children: React.ReactNode }) {
   const { slug, meId, bootstrap, shortcutsEnabled, shortcutScheme } = useInbox()
+  const { locale } = useI18n()
   const router = useRouter()
   const [width, setWidth] = usePersistentState("dispatch:sidebar:width", SIDEBAR.default)
   const [collapsed, setCollapsed] = usePersistentState("dispatch:sidebar:collapsed", false)
@@ -102,7 +104,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     <div className="flex h-full min-h-0 bg-background">
       {!collapsed && (
         <>
-          <aside className="hidden h-full shrink-0 border-r border-sidebar-border lg:block" style={{ width }} aria-label="Sidebar">
+          <aside className="hidden h-full shrink-0 border-r border-sidebar-border lg:block" style={{ width }} aria-label={locale === "it" ? "Barra laterale" : "Sidebar"}>
             <Sidebar onCollapse={() => setCollapsed(true)} />
           </aside>
           <ResizeHandle
@@ -112,7 +114,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
             min={SIDEBAR.min}
             max={SIDEBAR.max}
             defaultValue={SIDEBAR.default}
-            label="Resize sidebar"
+            label={locale === "it" ? "Ridimensiona barra laterale" : "Resize sidebar"}
           />
         </>
       )}
@@ -120,19 +122,19 @@ function ShellInner({ children }: { children: React.ReactNode }) {
         <div className="hidden h-full w-11 shrink-0 flex-col items-center border-r border-sidebar-border bg-sidebar py-2 lg:flex">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" onClick={() => setCollapsed(false)} aria-label="Expand sidebar">
+              <Button variant="ghost" size="icon-sm" onClick={() => setCollapsed(false)} aria-label={locale === "it" ? "Espandi barra laterale" : "Expand sidebar"}>
                 <PanelLeft />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">Expand sidebar</TooltipContent>
+            <TooltipContent side="right">{locale === "it" ? "Espandi barra laterale" : "Expand sidebar"}</TooltipContent>
           </Tooltip>
         </div>
       )}
 
       <Sheet open={mobileOpen} onOpenChange={(open) => inboxUI.set({ mobileNavOpen: open })}>
         <SheetContent side="left" className="w-[85vw] max-w-80 gap-0 p-0 lg:hidden" showCloseButton={false}>
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <SheetDescription className="sr-only">Mailboxes, teams, inboxes, labels and chats</SheetDescription>
+          <SheetTitle className="sr-only">{locale === "it" ? "Navigazione" : "Navigation"}</SheetTitle>
+          <SheetDescription className="sr-only">{locale === "it" ? "Caselle, team, etichette e chat" : "Mailboxes, teams, inboxes, labels and chats"}</SheetDescription>
           <Sidebar onNavigate={() => inboxUI.set({ mobileNavOpen: false })} />
         </SheetContent>
       </Sheet>
@@ -170,12 +172,13 @@ function ComposeFromUrl() {
 
 /** Hamburger that opens the sidebar sheet below `lg` (also when the desktop sidebar is collapsed). */
 export function MobileNavButton({ className }: { className?: string }) {
+  const { locale } = useI18n()
   return (
     <Button
       variant="ghost"
       size="icon"
       className={className ?? "-ml-1 size-10 lg:hidden"}
-      aria-label="Open navigation"
+      aria-label={locale === "it" ? "Apri navigazione" : "Open navigation"}
       onClick={() => inboxUI.set({ mobileNavOpen: true })}
     >
       <PanelLeft />

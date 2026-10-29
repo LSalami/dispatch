@@ -69,7 +69,7 @@ export function EmailComposer({
   onDraftChange,
   saveOnMount = false,
 }: EmailComposerProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { slug, bootstrap, member, meId } = useInbox()
   const { org } = useOrg()
   const uploads = useUploads(slug, bootstrap.settings.maxAttachmentMb, initialAttachments)
@@ -78,7 +78,7 @@ export function EmailComposer({
 
   const editor = useEmailEditor({
     content: initial.body,
-    placeholder: initial.mode === "forward" ? "Add a note…" : initial.mode === "new" ? "Write your message…" : "Write your reply…",
+    placeholder: initial.mode === "forward" ? (locale === "it" ? "Aggiungi una nota…" : "Add a note…") : initial.mode === "new" ? (locale === "it" ? "Scrivi il tuo messaggio…" : "Write your message…") : (locale === "it" ? "Scrivi la tua risposta…" : "Write your reply…"),
     autofocus: autoFocus && initial.mode !== "new" && initial.mode !== "forward",
     onChange: (html, ed) => {
       d.update({ body: isEditorEmpty(ed) ? "" : html })
@@ -131,8 +131,8 @@ export function EmailComposer({
   const editorsLabel = useMemo(() => {
     const names = coEditors.filter((id) => id !== meId).map((id) => firstName(member(id)))
     if (!names.length) return null
-    return `${names.join(", ")} ${names.length === 1 ? "is" : "are"} also writing`
-  }, [coEditors, meId, member])
+    return locale === "it" ? `${names.join(", ")} ${names.length === 1 ? "sta" : "stanno"} scrivendo` : `${names.join(", ")} ${names.length === 1 ? "is" : "are"} also writing`
+  }, [coEditors, meId, member, locale])
   const lastEditor = draft.isShared && serverDraft?.lastEditedBy && serverDraft.lastEditedBy !== meId ? member(serverDraft.lastEditedBy) : undefined
   const canSend = !d.sending && !uploads.uploading
 
@@ -148,7 +148,7 @@ export function EmailComposer({
       <div className="flex items-center gap-2 border-b px-3 py-1.5">
         {header}
         <div className="flex min-w-0 flex-1 items-center gap-1 text-[13px]">
-          <span className="shrink-0 text-muted-foreground">From</span>
+          <span className="shrink-0 text-muted-foreground">{locale === "it" ? "Da" : "From"}</span>
           <FromSelect
             accounts={accounts}
             accountId={draft.accountId}
@@ -169,19 +169,19 @@ export function EmailComposer({
               onPressedChange={(v) => {
                 if (draft.id && serverDraft && serverDraft.authorId !== meId) return
                 update({ isShared: v })
-                toast(v ? "Draft shared with teammates" : "Draft is private again")
+                toast(v ? (locale === "it" ? "Bozza condivisa con il team" : "Draft shared with teammates") : (locale === "it" ? "La bozza è di nuovo privata" : "Draft is private again"))
               }}
-              aria-label="Share draft with teammates"
+              aria-label={locale === "it" ? "Condividi la bozza con il team" : "Share draft with teammates"}
               className="h-7 gap-1 px-2 text-xs"
             >
               <Users className="size-3.5" />
-              <span className="max-sm:hidden">{draft.isShared ? "Shared" : "Share"}</span>
+          <span className="max-sm:hidden">{draft.isShared ? (locale === "it" ? "Condivisa" : "Shared") : (locale === "it" ? "Condividi" : "Share")}</span>
             </Toggle>
           </TooltipTrigger>
-          <TooltipContent>Shared drafts can be edited by teammates</TooltipContent>
+          <TooltipContent>{locale === "it" ? "I colleghi possono modificare le bozze condivise" : "Shared drafts can be edited by teammates"}</TooltipContent>
         </Tooltip>
         {onToggleExpanded && (
-          <Button variant="ghost" size="icon-sm" className="max-md:hidden" onClick={onToggleExpanded} aria-label={expanded ? "Shrink composer" : "Expand composer"}>
+          <Button variant="ghost" size="icon-sm" className="max-md:hidden" onClick={onToggleExpanded} aria-label={expanded ? (locale === "it" ? "Riduci composizione" : "Shrink composer") : (locale === "it" ? "Espandi composizione" : "Expand composer")}>
             {expanded ? <Minimize2 /> : <Maximize2 />}
           </Button>
         )}
@@ -192,14 +192,14 @@ export function EmailComposer({
             void d.save()
             onClose()
           }}
-          aria-label="Close composer (draft is saved)"
+          aria-label={t("inboxUiDraftSaved")}
         >
           <X />
         </Button>
       </div>
 
       <RecipientInput
-        label="To"
+        label={locale === "it" ? "A" : "To"}
         value={draft.to}
         onChange={(to) => update({ to })}
         autoFocus={autoFocus && (draft.mode === "new" || draft.mode === "forward")}
@@ -212,7 +212,7 @@ export function EmailComposer({
             )}
             {!showBcc && (
               <button type="button" className="rounded px-1 hover:text-foreground" onClick={() => setShowBcc(true)}>
-                Bcc
+                Ccn
               </button>
             )}
           </span>
@@ -223,7 +223,7 @@ export function EmailComposer({
       {(draft.mode === "new" || draft.mode === "forward") && (
         <div className="flex items-center gap-2 border-b px-3">
           <label htmlFor="composer-subject" className="w-8 shrink-0 text-[13px] text-muted-foreground">
-            Subj.
+            {locale === "it" ? "Oggetto" : "Subj."}
           </label>
           <Input
             id="composer-subject"
@@ -245,7 +245,7 @@ export function EmailComposer({
         )}
         {draft.mode !== "new" && (
           <p className="px-3 pb-2 text-[11.5px] text-muted-foreground">
-            {draft.mode === "forward" ? "The original message and its attachments are included below your note." : "The previous message will be quoted below your reply."}
+            {draft.mode === "forward" ? (locale === "it" ? "Il messaggio originale e i relativi allegati sono inclusi sotto la nota." : "The original message and its attachments are included below your note.") : (locale === "it" ? "Il messaggio precedente verrà citato sotto la risposta." : "The previous message will be quoted below your reply.")}
           </p>
         )}
       </div>
@@ -271,14 +271,14 @@ export function EmailComposer({
         <SignatureSelect value={draft.signatureId} accountId={draft.accountId} onChange={(signatureId) => update({ signatureId })} />
         <span className="ml-auto flex items-center gap-1.5">
           <span className="font-mono text-[10.5px] text-muted-foreground max-sm:hidden" aria-live="polite">
-            {d.saving ? "Saving…" : lastEditor ? `Edited by ${memberName(lastEditor)}` : d.lastSavedAt ? `Saved ${relative(d.lastSavedAt.toISOString())}` : ""}
+            {d.saving ? (locale === "it" ? "Salvataggio…" : "Saving…") : lastEditor ? `${locale === "it" ? "Modificata da" : "Edited by"} ${memberName(lastEditor)}` : d.lastSavedAt ? `${locale === "it" ? "Salvata" : "Saved"} ${relative(d.lastSavedAt.toISOString(), locale)}` : ""}
           </span>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label="Discard draft"
+                aria-label={t("inboxUiDiscardDraft")}
                 onClick={async () => {
                   try {
                     await d.discard()
@@ -287,14 +287,14 @@ export function EmailComposer({
                     onDiscarded?.()
                     onClose()
                   } catch (err) {
-                    toast.error(err instanceof Error ? err.message : "Could not discard the draft")
+                    toast.error(err instanceof Error ? err.message : (locale === "it" ? "Impossibile eliminare la bozza" : "Could not discard the draft"))
                   }
                 }}
               >
                 <Trash2 />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Discard draft</TooltipContent>
+            <TooltipContent>{t("inboxUiDiscardDraft")}</TooltipContent>
           </Tooltip>
           <SendButton onSend={(opts) => void d.send(opts)} disabled={!canSend} pending={d.sending} allowClose={draft.mode !== "new"} />
         </span>

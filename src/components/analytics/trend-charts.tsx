@@ -5,7 +5,6 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { ChartCard, DataTable, Legend } from "@/components/analytics/chart-card"
 import { formatBucket, formatCount, formatDuration } from "@/components/analytics/format"
-import { responseConfig, volumeConfig } from "@/components/analytics/palette"
 import type { SeriesPoint } from "@/server/workspace/queries/analytics"
 import { useI18n } from "@/lib/i18n"
 
@@ -18,12 +17,12 @@ const axisProps = {
 } as const
 
 export function VolumeChart({ series, granularity }: { series: SeriesPoint[]; granularity: Granularity }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const total = series.reduce((a, p) => a + p.received + p.replied, 0)
   return (
     <ChartCard
       title={t("conversationVolume")}
-      description={`New conversations received vs replies sent, per ${granularity}.`}
+      description={t("analyticsDescriptionVolume").replace("{granularity}", t(granularity === "week" ? "analyticsWeek" : "analyticsDayLabel").toLowerCase())}
       legend={
         <Legend
           items={[
@@ -34,11 +33,11 @@ export function VolumeChart({ series, granularity }: { series: SeriesPoint[]; gr
       }
       table={
         <DataTable
-          caption="Conversation volume"
+          caption={t("analyticsChartVolumeCaption")}
           columns={[
-            { key: "date", label: granularity === "week" ? "Week" : "Day" },
-            { key: "received", label: "Received", align: "right" },
-            { key: "replied", label: "Replies sent", align: "right" },
+            { key: "date", label: t(granularity === "week" ? "analyticsWeek" : "analyticsDayLabel") },
+            { key: "received", label: t("analyticsReceived"), align: "right" },
+            { key: "replied", label: t("repliesSent"), align: "right" },
           ]}
           rows={series.map((p) => ({
             date: formatBucket(p.date, granularity, true),
@@ -51,16 +50,16 @@ export function VolumeChart({ series, granularity }: { series: SeriesPoint[]; gr
       {total === 0 ? (
         <ChartEmpty>{t("noConversationReplies")}</ChartEmpty>
       ) : (
-        <ChartContainer config={volumeConfig} className="aspect-auto h-[260px] w-full">
+        <ChartContainer config={{ received: { label: t("analyticsReceived"), color: "var(--viz-in)" }, replied: { label: t("repliesSent"), color: "var(--viz-out)" } }} className="aspect-auto h-[260px] w-full">
           <LineChart data={series} margin={{ top: 8, right: 12, bottom: 0, left: 0 }} accessibilityLayer>
             <CartesianGrid vertical={false} />
-            <XAxis dataKey="date" {...axisProps} minTickGap={28} tickFormatter={(v: string) => formatBucket(v, granularity)} />
-            <YAxis {...axisProps} width={40} allowDecimals={false} tickFormatter={(v: number) => formatCount(v)} />
+            <XAxis dataKey="date" {...axisProps} minTickGap={28} tickFormatter={(v: string) => formatBucket(v, granularity, false, locale)} />
+            <YAxis {...axisProps} width={40} allowDecimals={false} tickFormatter={(v: number) => formatCount(v, "—", locale)} />
             <ChartTooltip
               content={
                 <ChartTooltipContent
                   indicator="line"
-                  labelFormatter={(value) => formatBucket(String(value), granularity, true)}
+                  labelFormatter={(value) => formatBucket(String(value), granularity, true, locale)}
                 />
               }
             />
@@ -101,7 +100,7 @@ function durationUnit(maxSeconds: number): { div: number; suffix: string } {
 }
 
 export function ResponseTimeChart({ series, granularity }: { series: SeriesPoint[]; granularity: Granularity }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const values = series.map((p) => p.medianFirstResponse).filter((v): v is number => v !== null)
   const unit = durationUnit(values.length ? Math.max(...values) : 0)
   const data = useMemo(
@@ -116,13 +115,13 @@ export function ResponseTimeChart({ series, granularity }: { series: SeriesPoint
   return (
     <ChartCard
       title={t("firstResponseTime")}
-      description={`Median time to first reply for conversations started each ${granularity}. Lower is better.`}
+      description={t("analyticsDescriptionResponse").replace("{granularity}", t(granularity === "week" ? "analyticsWeek" : "analyticsDayLabel").toLowerCase())}
       table={
         <DataTable
-          caption="First response time"
+          caption={t("analyticsResponseCaption")}
           columns={[
-            { key: "date", label: granularity === "week" ? "Week" : "Day" },
-            { key: "value", label: "Median first response", align: "right" },
+            { key: "date", label: t(granularity === "week" ? "analyticsWeek" : "analyticsDayLabel") },
+            { key: "value", label: t("analyticsMedianFirstReplyLegend"), align: "right" },
           ]}
           rows={series.map((p) => ({
             date: formatBucket(p.date, granularity, true),
@@ -134,23 +133,23 @@ export function ResponseTimeChart({ series, granularity }: { series: SeriesPoint
       {values.length === 0 ? (
         <ChartEmpty>{t("noAnsweredConversations")}</ChartEmpty>
       ) : (
-        <ChartContainer config={responseConfig} className="aspect-auto h-[220px] w-full">
+        <ChartContainer config={{ medianHours: { label: t("analyticsMedianFirstReplyLegend"), color: "var(--viz-out)" } }} className="aspect-auto h-[220px] w-full">
           <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }} accessibilityLayer>
             <CartesianGrid vertical={false} />
-            <XAxis dataKey="date" {...axisProps} minTickGap={28} tickFormatter={(v: string) => formatBucket(v, granularity)} />
+            <XAxis dataKey="date" {...axisProps} minTickGap={28} tickFormatter={(v: string) => formatBucket(v, granularity, false, locale)} />
             <YAxis {...axisProps} width={40} tickFormatter={(v: number) => `${v}${unit.suffix}`} />
             <ChartTooltip
               content={
                 <ChartTooltipContent
                   indicator="line"
-                  labelFormatter={(value) => formatBucket(String(value), granularity, true)}
+                  labelFormatter={(value) => formatBucket(String(value), granularity, true, locale)}
                   formatter={(_value, _name, item) => {
                     const seconds = (item.payload as { seconds: number | null }).seconds
                     return (
                       <div className="flex w-full items-center justify-between gap-3">
                         <span className="flex items-center gap-1.5 text-muted-foreground">
                           <span className="h-0.5 w-3 rounded-full" style={{ backgroundColor: "var(--viz-out)" }} aria-hidden />
-                          Median first response
+                          {t("analyticsMedianFirstReplyLegend")}
                         </span>
                         <span className="font-mono font-medium text-foreground tabular-nums">{formatDuration(seconds)}</span>
                       </div>

@@ -27,7 +27,8 @@ export function LabelsSettings({
   initial: Data
   canManageShared: boolean
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const it = locale === "it"
   // Local copy for optimistic reordering; re-synced when the server data changes
   const [data, setData] = useState<Data>(initial)
   const [synced, setSynced] = useState<Data>(initial)
@@ -84,10 +85,10 @@ export function LabelsSettings({
 
   return (
     <SettingsPage
-      eyebrow="Productivity"
+      eyebrow={it ? "Produttività" : "Productivity"}
       title={t("labelsTitle")}
-      quiet="to organize every conversation"
-      description="Labels group conversations across inboxes and can appear as their own mailboxes in the sidebar. Workspace labels are shared with everyone; private labels are only visible to you."
+      quiet={it ? "per organizzare ogni conversazione" : "to organize every conversation"}
+      description={it ? "Le etichette raggruppano le conversazioni tra caselle e possono comparire nella barra laterale come caselle autonome. Le etichette del workspace sono condivise; quelle private sono visibili solo a te." : "Labels group conversations across inboxes and can appear as their own mailboxes in the sidebar. Workspace labels are shared with everyone; private labels are only visible to you."}
       actions={
         <Button onClick={() => setDialog({ mode: "create", visibility: canManageShared ? "shared" : "private", parentId: null })}>
           <Plus /> {t("newLabel")}
@@ -96,7 +97,7 @@ export function LabelsSettings({
     >
       <SettingsSection
         title={t("workspaceLabels")}
-        description={`Shared with everyone in ${orgName}.`}
+        description={it ? `Condivise con tutti in ${orgName}.` : `Shared with everyone in ${orgName}.`}
         action={
           canManageShared ? (
             <Button variant="outline" size="sm" onClick={() => setDialog({ mode: "create", visibility: "shared", parentId: null })}>
@@ -114,21 +115,21 @@ export function LabelsSettings({
             <SectionFooter
               hint={
                 canManageShared
-                  ? `Drag to reorder. Labels can be nested up to ${MAX_LABEL_DEPTH} levels deep.`
-                  : "You can apply workspace labels, but only members with “Manage shared labels” can change them."
+                  ? (it ? `Trascina per riordinare. Le etichette possono avere fino a ${MAX_LABEL_DEPTH} livelli.` : `Drag to reorder. Labels can be nested up to ${MAX_LABEL_DEPTH} levels deep.`)
+                  : (it ? "Puoi applicare le etichette del workspace, ma solo chi ha il permesso “Gestisci etichette condivise” può modificarle." : "You can apply workspace labels, but only members with “Manage shared labels” can change them.")
               }
             />
           )
         }
       >
         {data.shared.length ? (
-          <LabelTree labels={data.shared} editable={canManageShared} handlers={handlersFor("shared")} ariaLabel="Workspace labels" />
+          <LabelTree labels={data.shared} editable={canManageShared} handlers={handlersFor("shared")} ariaLabel={it ? "Etichette workspace" : "Workspace labels"} />
         ) : (
           <div className="px-5 pb-5">
             <EmptyState
               icon={<Tags />}
               title={t("noWorkspaceLabels")}
-              description={canManageShared ? "Create labels like “Billing” or “Bug” to triage faster." : "Admins haven't created any shared labels yet."}
+              description={canManageShared ? (it ? "Crea etichette come “Fatturazione” o “Bug” per gestire le conversazioni più rapidamente." : "Create labels like “Billing” or “Bug” to triage faster.") : (it ? "Gli amministratori non hanno ancora creato etichette condivise." : "Admins haven't created any shared labels yet.")}
             >
               {canManageShared && (
                 <Button size="sm" onClick={() => setDialog({ mode: "create", visibility: "shared", parentId: null })}>
@@ -142,23 +143,23 @@ export function LabelsSettings({
 
       <SettingsSection
         title={t("myPrivateLabels")}
-        description="Only you can see these labels and which conversations they're on."
+        description={it ? "Solo tu puoi vedere queste etichette e le conversazioni a cui sono applicate." : "Only you can see these labels and which conversations they're on."}
         action={
           <Button variant="outline" size="sm" onClick={() => setDialog({ mode: "create", visibility: "private", parentId: null })}>
             <Plus /> {t("add")}
           </Button>
         }
         flush
-        footer={data.private.length > 0 && <SectionFooter hint="Drag to reorder your private labels." />}
+        footer={data.private.length > 0 && <SectionFooter hint={it ? "Trascina per riordinare le etichette private." : "Drag to reorder your private labels."} />}
       >
         {data.private.length ? (
-          <LabelTree labels={data.private} editable handlers={handlersFor("private")} ariaLabel="My private labels" />
+          <LabelTree labels={data.private} editable handlers={handlersFor("private")} ariaLabel={it ? "Le mie etichette private" : "My private labels"} />
         ) : (
           <div className="px-5 pb-5">
             <EmptyState
               icon={<Lock />}
               title={t("noPrivateLabels")}
-              description="Keep personal follow-ups organized — “To read”, “Waiting on reply”…"
+              description={it ? "Organizza i tuoi promemoria personali, ad esempio “Da leggere” o “In attesa di risposta”…" : "Keep personal follow-ups organized — “To read”, “Waiting on reply”…"}
             >
               <Button size="sm" variant="outline" onClick={() => setDialog({ mode: "create", visibility: "private", parentId: null })}>
                 <Plus /> {t("createPrivateLabel")}

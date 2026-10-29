@@ -180,7 +180,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
   const shortcutLabel = useShortcutLabel()
   const { slug, bootstrap, member, meId } = useInbox()
   const { can } = useOrg()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const hint = useShortcutHint()
   const params = useParams<{ box?: string; conversationId?: string }>()
   const current = params.box ? decodeURIComponent(params.box) : ""
@@ -203,7 +203,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           dot={l.color}
           count={counts[`label.${l.id}`]}
           onNavigate={onNavigate}
-          trailing={l.visibility === "private" ? <UserRound className="size-3 text-muted-foreground" aria-label="Private label" /> : null}
+          trailing={l.visibility === "private" ? <UserRound className="size-3 text-muted-foreground" aria-label={t("inboxUiPrivate")} /> : null}
         />
       </div>
       {l.children.map((c) => renderLabel(c, depth + 1))}
@@ -259,7 +259,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
         </Tooltip>
       </div>
 
-      <nav aria-label="Mailboxes" className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 pb-4">
+      <nav aria-label={t("inboxUiMailboxes")} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <div className="flex flex-col gap-px">
           {PRIMARY.map((item) => (
             <NavItem
@@ -324,7 +324,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                 <Link
                   href={`${base}/settings/inboxes`}
                   onClick={onNavigate}
-                  aria-label="Connect an inbox"
+                  aria-label={locale === "it" ? "Collega una casella" : "Connect an inbox"}
                   className="flex size-6 items-center justify-center rounded text-muted-foreground opacity-0 outline-none group-hover/section:opacity-100 hover:bg-sidebar-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring max-lg:opacity-100"
                 >
                   <Plus className="size-3.5" />
@@ -347,12 +347,12 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                   a.status === "error" ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <TriangleAlert className="size-3.5 shrink-0 text-destructive" aria-label="Sync error" />
+                        <TriangleAlert className="size-3.5 shrink-0 text-destructive" aria-label={locale === "it" ? "Errore di sincronizzazione" : "Sync error"} />
                       </TooltipTrigger>
                       <TooltipContent className="max-w-64">{a.lastError || "This inbox has a connection problem."}</TooltipContent>
                     </Tooltip>
                   ) : a.isPersonal ? (
-                    <UserRound className="size-3 shrink-0 text-muted-foreground" aria-label="Personal inbox" />
+                    <UserRound className="size-3 shrink-0 text-muted-foreground" aria-label={locale === "it" ? "Casella personale" : "Personal inbox"} />
                   ) : null
                 }
               />
@@ -368,7 +368,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
 
         <Section
           id="chats"
-          title="Chats"
+          title={t("inboxUiChats")}
           action={
             can("chats.create") && (
               <button
@@ -377,7 +377,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                   onNavigate?.()
                   inboxUI.set({ newChatOpen: true })
                 }}
-                aria-label="New chat"
+                aria-label={t("inboxUiNewChat")}
                 className="flex size-6 items-center justify-center rounded text-muted-foreground opacity-0 outline-none group-hover/section:opacity-100 hover:bg-sidebar-accent hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring max-lg:opacity-100"
               >
                 <Plus className="size-3.5" />
@@ -385,10 +385,10 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             )
           }
         >
-          {chats.length === 0 && <p className="px-2 py-1 text-xs text-muted-foreground">No chats yet.</p>}
+          {chats.length === 0 && <p className="px-2 py-1 text-xs text-muted-foreground">{t("inboxUiNoChats")}</p>}
           {chats.slice(0, 30).map((chat) => {
             const other = chat.isDirect ? member(chat.memberIds.find((id) => id !== meId)) : undefined
-            const name = chat.isDirect ? memberName(other, "Direct message") : chat.name || "Group chat"
+            const name = chat.isDirect ? memberName(other, locale === "it" ? "Messaggio diretto" : "Direct message") : chat.name || (locale === "it" ? "Chat di gruppo" : "Group chat")
             const active = current === "chats" && conversationId === chat.id
             return (
               <Link
@@ -409,7 +409,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                   <Hash className="size-4 shrink-0 text-muted-foreground" />
                 )}
                 <span className="min-w-0 flex-1 truncate">{name}</span>
-                {chat.unread && <span className="size-2 shrink-0 rounded-full bg-brand" aria-label="Unread" />}
+                {chat.unread && <span className="size-2 shrink-0 rounded-full bg-brand" aria-label={locale === "it" ? "Da leggere" : "Unread"} />}
               </Link>
             )
           })}
@@ -422,32 +422,32 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" asChild className="max-lg:size-10">
-              <Link href={`${base}/tasks`} onClick={onNavigate} aria-label="Tasks">
+              <Link href={`${base}/tasks`} onClick={onNavigate} aria-label={t("inboxUiTasks")}>
                 <SquareCheckBig />
               </Link>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Tasks</TooltipContent>
+          <TooltipContent>{t("inboxUiTasks")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" asChild className="max-lg:size-10">
-              <Link href={`${base}/contacts`} onClick={onNavigate} aria-label="Contacts">
+              <Link href={`${base}/contacts`} onClick={onNavigate} aria-label={t("inboxUiContacts")}>
                 <Contact />
               </Link>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Contacts</TooltipContent>
+          <TooltipContent>{t("inboxUiContacts")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" asChild className="max-lg:size-10">
-              <Link href={`${base}/settings`} onClick={onNavigate} aria-label="Settings">
+              <Link href={`${base}/settings`} onClick={onNavigate} aria-label={t("inboxUiSettings")}>
                 <Settings />
               </Link>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Settings</TooltipContent>
+          <TooltipContent>{t("inboxUiSettings")}</TooltipContent>
         </Tooltip>
       </div>
     </div>

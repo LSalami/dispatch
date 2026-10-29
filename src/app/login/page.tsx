@@ -36,6 +36,20 @@ const ERRORS: Record<string, string> = {
   session_expired: "Your session has expired. Please sign in again.",
 }
 
+const ERRORS_IT: Record<string, string> = {
+  access_denied: "Accesso annullato.",
+  oauth_denied: "Accesso annullato.",
+  oauth_failed: "Impossibile completare l’accesso con questo provider. Riprova oppure usa la tua email.",
+  oauth_state: "La sessione di accesso è scaduta. Riprova.",
+  oauth_disabled: "Questo metodo di accesso non è attivo in questa istanza.",
+  email_unverified: "Il provider non ha verificato il tuo indirizzo email. Accedi usando la tua email.",
+  not_allowed: "L’accesso a questa istanza è solo su invito. Chiedi a un amministratore del workspace di invitarti.",
+  domain: "Le registrazioni sono limitate ai domini email approvati.",
+  invite_only: "L’accesso a questa istanza è solo su invito. Chiedi a un amministratore del workspace di invitarti.",
+  disabled: "Questo account è stato disattivato. Contatta l’amministratore.",
+  session_expired: "La sessione è scaduta. Accedi di nuovo.",
+}
+
 function first(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] : v
 }
@@ -66,9 +80,9 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   let notice: LoginNotice | null = null
   if (errorCode) {
     const signed = errorCode.length <= 600 ? unsign(errorCode, "login-error") : null
-    notice = { tone: "error", text: signed?.slice(0, 300) || ERRORS[errorCode] || "Sign-in failed. Please try again." }
+    notice = { tone: "error", text: signed?.slice(0, 300) || (italian ? ERRORS_IT[errorCode] : ERRORS[errorCode]) || (italian ? "Accesso non riuscito. Riprova." : "Sign-in failed. Please try again.") }
   }
-  else if (first(sp.signed_out)) notice = { tone: "success", text: "You've been signed out on this device." }
+  else if (first(sp.signed_out)) notice = { tone: "success", text: italian ? "Hai effettuato la disconnessione su questo dispositivo." : "You've been signed out on this device." }
 
   const signupHint =
     auth.signupMode === "open"

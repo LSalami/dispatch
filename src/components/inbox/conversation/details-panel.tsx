@@ -34,7 +34,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 /** Right sidebar: customer (contact card), tasks, conversation details and recent activity. */
 export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; onClose?: () => void }) {
   const { slug, account, team, member } = useInbox()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const describe = useEventText()
   const conv = thread.conversation
   const isChat = conv.kind === "chat"
@@ -47,7 +47,7 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
       <div className="flex h-12 shrink-0 items-center justify-between border-b px-4">
         <h2 className="text-sm font-semibold tracking-tight">{t("details")}</h2>
         {onClose && (
-          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close details">
+          <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label={t("inboxUiHideDetails")}>
             <X />
           </Button>
         )}
@@ -71,7 +71,7 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
                   <Button
                     variant="ghost"
                     size="icon-xs"
-                    aria-label={`Copy ${p.email}`}
+                    aria-label={`${t("inboxUiCopy")} ${p.email}`}
                     onClick={() => {
                       void navigator.clipboard.writeText(p.email)
                       toast.success(t("emailCopied"))
@@ -79,7 +79,7 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
                   >
                     <Copy />
                   </Button>
-                  <Button variant="ghost" size="icon-xs" aria-label={`Email ${participantName(p)}`} onClick={() => inboxUI.openCompose({ to: [p] })}>
+                  <Button variant="ghost" size="icon-xs" aria-label={`${t("inboxUiSendFrom")} ${participantName(p)}`} onClick={() => inboxUI.openCompose({ to: [p] })}>
                     <SquarePen />
                   </Button>
                 </li>
@@ -116,29 +116,29 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
             <Row label={t("number")}>#{conv.number}</Row>
             <Row label={t("status")}>{conv.status === "closed" ? t("closed") : t("open")}</Row>
             {acc && (
-              <Row label="Inbox">
+              <Row label={t("inbox")}>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="size-2 rounded-full" style={{ backgroundColor: acc.color }} />
                   {acc.name}
                 </span>
               </Row>
             )}
-            {tm && <Row label="Team">{tm.name}</Row>}
+            {tm && <Row label={t("team")}>{tm.name}</Row>}
             <Row label={t("created")}>
-              <span title={fullTime(conv.createdAt)}>{relative(conv.createdAt)}</span>
+              <span title={fullTime(conv.createdAt, locale)}>{relative(conv.createdAt, locale)}</span>
             </Row>
             {!isChat && <Row label={t("messages")}>{conv.messageCount}</Row>}
             <Row label={t("comments")}>{conv.commentCount}</Row>
             {conv.firstResponseAt && (
               <Row label={t("firstReply")}>
-                <span title={fullTime(conv.firstResponseAt)}>{relative(conv.firstResponseAt)}</span>
+                <span title={fullTime(conv.firstResponseAt, locale)}>{relative(conv.firstResponseAt, locale)}</span>
               </Row>
             )}
             {conv.closedAt && (
-              <Row label="Closed">
-                <span title={fullTime(conv.closedAt)}>
-                  {relative(conv.closedAt)}
-                  {conv.closedBy ? ` by ${memberName(member(conv.closedBy))}` : ""}
+              <Row label={t("closed")}>
+                <span title={fullTime(conv.closedAt, locale)}>
+                  {relative(conv.closedAt, locale)}
+                  {conv.closedBy ? ` ${t("inboxUiToLabel")} ${memberName(member(conv.closedBy))}` : ""}
                 </span>
               </Row>
             )}
@@ -159,7 +159,7 @@ export function DetailsPanel({ thread, onClose }: { thread: ConversationThread; 
                       <Icon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                       <span className="min-w-0 flex-1 text-muted-foreground">
                         <span className="font-medium text-foreground/80">{actor}</span> {text}
-                        <span className="block font-mono text-[10.5px]">{relative(e.createdAt)}</span>
+                        <span className="block font-mono text-[10.5px]">{relative(e.createdAt, locale)}</span>
                       </span>
                     </li>
                   )

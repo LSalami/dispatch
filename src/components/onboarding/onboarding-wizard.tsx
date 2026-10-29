@@ -38,6 +38,17 @@ const STEPS: RailStep[] = [
   { id: "start", label: "Get started" },
 ]
 
+function localizeError(message: string, it: boolean) {
+  if (!it) return message
+  const known: Record<string, string> = {
+    "Already a member": "È già membro del workspace",
+    "Already invited": "Invito già inviato",
+    "Invalid email address": "Indirizzo email non valido",
+    "Email is required": "L’indirizzo email è obbligatorio",
+  }
+  return known[message] ?? message
+}
+
 export type OnboardingWizardProps = {
   initialStep: 0 | 1 | 2
   workspace: { name: string; slug: string } | null
@@ -51,7 +62,13 @@ export type OnboardingWizardProps = {
 }
 
 export function OnboardingWizard(props: OnboardingWizardProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const it = locale === "it"
+  const steps = it ? [
+    { id: "workspace", label: "Workspace" },
+    { id: "invite", label: "Invita il team" },
+    { id: "start", label: "Inizia" },
+  ] satisfies RailStep[] : STEPS
   const router = useRouter()
   const [step, setStep] = useState<number>(props.initialStep)
   const [workspace, setWorkspace] = useState(props.workspace)
@@ -74,7 +91,7 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
         yourName: props.needsName ? yourName : undefined,
       })
       if (!res.ok) {
-        setError(res.error)
+        setError(localizeError(res.error, it))
         return
       }
       setWorkspace(res.data)
@@ -89,13 +106,13 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
     startTransition(async () => {
       const res = await inviteTeammatesAction({ slug: workspace.slug, emails })
       if (!res.ok) {
-        setError(res.error)
+        setError(localizeError(res.error, it))
         return
       }
       setResults(res.data)
       setEmails([])
       const sent = res.data.filter((r) => r.status === "invited").length
-      if (sent) toast.success(`${sent} invitation${sent === 1 ? "" : "s"} created`)
+      if (sent) toast.success(it ? `${sent} inviti creati` : `${sent} invitation${sent === 1 ? "" : "s"} created`)
     })
   }
 
@@ -106,10 +123,10 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
       const res = await finishOnboardingAction({ slug: workspace.slug, demo: kind === "demo" })
       if (!res.ok) {
         setFinishing(null)
-        toast.error(res.error)
+        toast.error(localizeError(res.error, it))
         return
       }
-      if (res.data.demoError) toast.error(`Demo data couldn't be loaded: ${res.data.demoError}`)
+      if (res.data.demoError) toast.error(it ? `Impossibile caricare i dati demo: ${res.data.demoError}` : `Demo data couldn't be loaded: ${res.data.demoError}`)
       const base = `/w/${workspace.slug}`
       window.location.assign(kind === "connect" ? `${base}/settings/inboxes?connect=1` : `${base}/inbox`)
     })
@@ -118,7 +135,7 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
   return (
     <div>
       <div className="mb-8">
-        <StepProgress steps={STEPS} current={step} />
+        <StepProgress steps={steps} current={step} />
       </div>
 
       {step === 0 && (
@@ -204,7 +221,7 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
                 onChange={setEmails}
                 placeholder={t("inviteEmailsPlaceholder")}
                 normalize={(v) => v.trim().toLowerCase()}
-                validate={(v) => (EMAIL_RE.test(v) ? null : `“${v}” is not a valid email address`)}
+                validate={(v) => (EMAIL_RE.test(v) ? null : it ? `“${v}” non è un indirizzo email valido` : `“${v}” is not a valid email address`)}
                 className="min-h-10 bg-card"
               />
               <p className="text-xs text-muted-foreground">{t("separateAddresses")}</p>
@@ -240,14 +257,14 @@ export function OnboardingWizard(props: OnboardingWizardProps) {
                   )}
                   <span className="min-w-0 flex-1 truncate">{r.email}</span>
                   <span className="text-xs text-muted-foreground">
-                    {r.status === "invited" ? (r.delivered ? "Invitation sent" : "Share the link") : r.reason}
+                    {r.status === "invited" ? (r.delivered ? (it ? "Invito inviato" : "Invitation sent") : (it ? "Condividi il link" : "Share the link")) : localizeError(r.reason ?? "", it)}
                   </span>
                   {r.url && (
                     <div className="flex w-full min-w-0 items-center gap-1 rounded-md border border-border bg-surface py-0.5 pr-0.5 pl-2.5">
                       <code className="min-w-0 flex-1 truncate font-mono text-[12px]" title={r.url}>
                         {r.url}
                       </code>
-                      <CopyButton value={r.url} label={`Copy invitation link for ${r.email}`} />
+                      <CopyButton value={r.url} label={it ? `Copia il link di invito per ${r.email}` : `Copy invitation link for ${r.email}`} />
                     </div>
                   )}
                 </li>

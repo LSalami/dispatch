@@ -53,7 +53,7 @@ function NewContactForm({
   onCreated?: (contact: ContactDto) => void
   onClose: () => void
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { can } = useOrg()
   const canShare = can("contacts.manage")
   const { create } = useContactMutations(slug)
@@ -99,11 +99,11 @@ function NewContactForm({
       </DialogHeader>
       <div className="grid gap-3">
         <div className="grid gap-1.5">
-          <Label htmlFor="nc-email">Email</Label>
+          <Label htmlFor="nc-email">{locale === "it" ? "Email" : "Email"}</Label>
           <Input id="nc-email" type="email" required autoFocus value={form.email} onChange={set("email")} placeholder={t("contactEmailPlaceholder")} aria-invalid={Boolean(error)} />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="nc-name">Name</Label>
+          <Label htmlFor="nc-name">{locale === "it" ? "Nome" : "Name"}</Label>
           <Input id="nc-name" value={form.name} onChange={set("name")} placeholder={t("contactNamePlaceholder")} />
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -133,7 +133,7 @@ function NewContactForm({
               {canShare ? t("onlyYouSee") : t("privateManagedAdmins")}
             </span>
           </span>
-          <Switch checked={isPrivate} onCheckedChange={setIsPrivate} disabled={!canShare} aria-label="Private contact" />
+          <Switch checked={isPrivate} onCheckedChange={setIsPrivate} disabled={!canShare} aria-label={locale === "it" ? "Contatto privato" : "Private contact"} />
         </label>
         {error && (
           <p className="text-[13px] text-destructive" role="alert">
@@ -167,7 +167,8 @@ export function ImportContactsDialog({ slug, open, onOpenChange }: { slug: strin
 }
 
 function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const it = locale === "it"
   const { can } = useOrg()
   const canShare = can("contacts.manage")
   const { importContacts } = useContactMutations(slug)
@@ -189,32 +190,32 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
 
   const load = async (file: File) => {
     setError(null)
-    if (file.size > 10 * 1024 * 1024) return setError("That file is larger than 10 MB.")
+    if (file.size > 10 * 1024 * 1024) return setError(it ? "Il file supera i 10 MB." : "That file is larger than 10 MB.")
     const text = await file.text()
     const parsed = parseCsv(text)
-    if (parsed.length < 2) return setError("The file needs a header row and at least one contact.")
+    if (parsed.length < 2) return setError(it ? "Il file deve contenere una riga d’intestazione e almeno un contatto." : "The file needs a header row and at least one contact.")
     const [head, ...body] = parsed
-    if (body.length > 5000) return setError("You can import up to 5,000 contacts at a time. Split the file and try again.")
+    if (body.length > 5000) return setError(it ? "Puoi importare al massimo 5.000 contatti alla volta. Dividi il file e riprova." : "You can import up to 5,000 contacts at a time. Split the file and try again.")
     const guessed = guessMapping(head!)
     setFileName(file.name)
     setHeaders(head!)
     setRows(body)
     setMapping(guessed)
-    if (!guessed.includes("email")) setError("We couldn’t find an email column. Pick it below.")
+    if (!guessed.includes("email")) setError(it ? "Non è stata trovata una colonna email. Selezionala qui sotto." : "We couldn’t find an email column. Pick it below.")
   }
 
   const submit = async () => {
     setError(null)
     try {
       const r = await importContacts.mutateAsync({ contacts, isPrivate, mode })
-      const parts = [`${r.created} added`]
-      if (r.updated) parts.push(`${r.updated} updated`)
-      if (r.skipped) parts.push(`${r.skipped} skipped`)
-      if (r.invalid) parts.push(`${r.invalid} invalid`)
-      toast.success("Import finished", { description: parts.join(" · ") })
+      const parts = [`${r.created} ${it ? "aggiunti" : "added"}`]
+      if (r.updated) parts.push(`${r.updated} ${it ? "aggiornati" : "updated"}`)
+      if (r.skipped) parts.push(`${r.skipped} ${it ? "ignorati" : "skipped"}`)
+      if (r.invalid) parts.push(`${r.invalid} ${it ? "non validi" : "invalid"}`)
+      toast.success(it ? "Importazione completata" : "Import finished", { description: parts.join(" · ") })
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Import failed")
+      setError(err instanceof Error ? err.message : (it ? "Importazione non riuscita" : "Import failed"))
     }
   }
 
@@ -292,7 +293,7 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
                         <SelectContent>
                           {FIELD_OPTIONS.map((f) => (
                             <SelectItem key={f} value={f} className="text-xs">
-                              {f === "skip" ? (extraAsCustom ? t("customField") : t("doNotImport")) : FIELD_LABELS[f]}
+                              {f === "skip" ? (extraAsCustom ? t("customField") : t("doNotImport")) : it ? ({ name: "Nome completo", firstName: "Nome", lastName: "Cognome", company: "Azienda", title: "Ruolo", phone: "Telefono", notes: "Note", email: "Email", tags: "Etichette" }[f]) : FIELD_LABELS[f]}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -317,18 +318,18 @@ function ImportFlow({ slug, onClose }: { slug: string; onClose: () => void }) {
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
               <span className="text-[13px]">{t("importUnmapped")}</span>
-              <Switch checked={extraAsCustom} onCheckedChange={setExtraAsCustom} aria-label="Import unmapped columns as custom fields" />
+              <Switch checked={extraAsCustom} onCheckedChange={setExtraAsCustom} aria-label={it ? "Importa le colonne non abbinate come campi personalizzati" : "Import unmapped columns as custom fields"} />
             </label>
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
               <span className="text-[13px]">{t("updateExisting")}</span>
-              <Switch checked={mode === "update"} onCheckedChange={(v) => setMode(v ? "update" : "skip")} aria-label="Update existing contacts" />
+              <Switch checked={mode === "update"} onCheckedChange={(v) => setMode(v ? "update" : "skip")} aria-label={it ? "Aggiorna i contatti esistenti" : "Update existing contacts"} />
             </label>
             <label className="flex items-center justify-between gap-3 rounded-lg border px-3 py-2 sm:col-span-2">
               <span className="flex flex-col">
                 <span className="text-[13px]">{t("importPrivate")}</span>
                 {!canShare && <span className="text-xs text-muted-foreground">{t("adminsOnlyShared")}</span>}
               </span>
-              <Switch checked={isPrivate} onCheckedChange={setIsPrivate} disabled={!canShare} aria-label="Import as private contacts" />
+              <Switch checked={isPrivate} onCheckedChange={setIsPrivate} disabled={!canShare} aria-label={it ? "Importa come contatti privati" : "Import as private contacts"} />
             </label>
           </div>
         </div>

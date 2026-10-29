@@ -43,7 +43,7 @@ import {
 } from "@/server/workspace/actions/members"
 import type { InvitationRow, MemberRow, MembersPageData } from "@/server/workspace/queries/members"
 import { cn } from "@/lib/utils"
-import { useI18n } from "@/lib/i18n"
+import { localizeRoleName, useI18n } from "@/lib/i18n"
 
 type Teams = MembersPageData["teams"]
 
@@ -55,7 +55,7 @@ type PendingConfirm =
   | null
 
 export function MembersSettings({ slug, orgName, data }: { slug: string; orgName: string; data: MembersPageData }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const { members, invitations, roles, teams, canManage, canInvite, canAssignTeams, emailDelivery, defaultRoleId } = data
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState<"all" | "active" | "suspended">("all")
@@ -74,9 +74,10 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
       if (status !== "all" && m.status !== status) return false
       if (roleFilter !== "all" && m.roleId !== roleFilter) return false
       if (!q) return true
-      return [m.name, m.email, m.title, roleById.get(m.roleId)?.name].some((v) => v?.toLowerCase().includes(q))
+      const role = roleById.get(m.roleId)
+      return [m.name, m.email, m.title, role && localizeRoleName(role.key, role.name, locale)].some((v) => v?.toLowerCase().includes(q))
     })
-  }, [members, query, status, roleFilter, roleById])
+  }, [members, query, status, roleFilter, roleById, locale])
 
   const requestRoleChange = (member: MemberRow, roleId: string) => {
     if (roleId === member.roleId) return
@@ -87,7 +88,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
 
   const changeRole = (member: MemberRow, roleId: string) =>
     run(() => changeMemberRoleAction({ slug, userId: member.userId, roleId }), {
-      success: (d) => `${member.name || member.email}: ${t("memChangeRole")} → ${d.roleName}`,
+      success: (d) => `${member.name || member.email}: ${t("memChangeRole")} → ${localizeRoleName(roleById.get(roleId)?.key, d.roleName, locale)}`,
     })
 
   const setMemberStatus = (member: MemberRow, next: "active" | "suspended") =>
@@ -137,7 +138,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
       return (
         <span className={cn("inline-flex items-center gap-1.5 text-[13px]", className)}>
           <ColorDot color={role?.color ?? "#64748b"} className="size-2" />
-          {role?.name ?? "—"}
+          {role ? localizeRoleName(role.key, role.name, locale) : "—"}
         </span>
       )
     }
@@ -150,7 +151,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
           {roles.map((r) => (
             <SelectItem key={r.id} value={r.id} disabled={!r.grantable && r.id !== m.roleId}>
               <ColorDot color={r.color ?? "#64748b"} className="size-2" />
-              {r.name}
+              {localizeRoleName(r.key, r.name, locale)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -256,19 +257,19 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                   <SelectItem value="all">{t("memAllRoles")}</SelectItem>
                   {roles.map((r) => (
                     <SelectItem key={r.id} value={r.id}>
-                      {r.name}
+                      {localizeRoleName(r.key, r.name, locale)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-                <SelectTrigger className="flex-1 sm:w-32" aria-label="Filter by status">
+                <SelectTrigger className="flex-1 sm:w-32" aria-label={t("memFilterStatus")}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">
-                  <SelectItem value="all">Any status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
+                  <SelectItem value="all">{t("anyStatus")}</SelectItem>
+                  <SelectItem value="active">{t("memActive")}</SelectItem>
+                  <SelectItem value="suspended">{t("memSuspendedStatus")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -279,8 +280,8 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
           <div className="px-5 pb-5">
             <EmptyState
               icon={<Users />}
-              title="No matching members"
-              description="Try a different search or clear the filters."
+              title={t("memNoMatching")}
+              description={t("memTryDifferentSearch")}
             >
               <Button
                 variant="outline"
@@ -291,7 +292,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                   setStatus("all")
                 }}
               >
-                Clear filters
+                {t("clearFilters")}
               </Button>
             </EmptyState>
           </div>
@@ -308,7 +309,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                       </th>
                     ))}
                     <th scope="col" className="w-12 pr-3">
-                      <span className="sr-only">Actions</span>
+                      <span className="sr-only">{t("memActions")}</span>
                     </th>
                   </tr>
                 </thead>
@@ -320,7 +321,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                       <td className="px-3 py-2.5">{teamChips(m.teamIds)}</td>
                       <td className="px-3 py-2.5">{statusBadge(m)}</td>
                       <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
-                        <LocalTime date={m.lastSeenAt} format="relative" titleFormat="datetime" fallback="Never" />
+                        <LocalTime date={m.lastSeenAt} format="relative" titleFormat="datetime" fallback={t("never")} />
                       </td>
                       <td className="px-3 py-2.5 whitespace-nowrap text-muted-foreground">
                         <LocalTime date={m.joinedAt} format="date" />
@@ -404,7 +405,7 @@ export function MembersSettings({ slug, orgName, data }: { slug: string; orgName
                         {role?.name ?? "—"}
                       </span>
                       {inv.expired ? (
-                        <StatusBadge tone="danger">Expired</StatusBadge>
+                        <StatusBadge tone="danger">{locale === "it" ? "Scaduto" : "Expired"}</StatusBadge>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground">
                           <Clock className="size-3" /> {t("memExpires")} <LocalTime date={inv.expiresAt} format="relative" titleFormat="datetime" />

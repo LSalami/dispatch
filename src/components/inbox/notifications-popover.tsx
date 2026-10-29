@@ -27,7 +27,7 @@ const TYPE_ICON: Record<string, typeof Bell> = {
 
 export function NotificationsButton({ onNavigate }: { onNavigate?: () => void }) {
   const { slug, member } = useInbox()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [open, setOpen] = useState(false)
   const router = useRouter()
   const params = useParams<{ box?: string }>()
@@ -65,7 +65,7 @@ export function NotificationsButton({ onNavigate }: { onNavigate?: () => void })
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon-sm" className="relative max-lg:size-10" aria-label={`Notifications${unread ? ` (${unread} unread)` : ""}`}>
+            <Button variant="ghost" size="icon-sm" className="relative max-lg:size-10" aria-label={`${t("notifications")}${unread ? ` (${unread} ${locale === "it" ? "da leggere" : "unread"})` : ""}`}>
               <Bell />
               {unread > 0 && (
                 <span className="absolute top-0.5 right-0.5 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-brand px-0.5 font-mono text-[9px] font-semibold text-brand-foreground">
@@ -128,9 +128,9 @@ export function NotificationsButton({ onNavigate }: { onNavigate?: () => void })
                     <span className="min-w-0 flex-1">
                       <span className={cn("line-clamp-2 text-[13px] leading-snug", !n.readAt && "font-medium")}>{n.title}</span>
                       {n.body && <span className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{n.body}</span>}
-                      <span className="mt-1 block font-mono text-[10.5px] text-muted-foreground">{relative(n.createdAt)}</span>
+                      <span className="mt-1 block font-mono text-[10.5px] text-muted-foreground">{relative(n.createdAt, locale)}</span>
                     </span>
-                    {!n.readAt && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-label="Unread" />}
+                    {!n.readAt && <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-label={locale === "it" ? "Da leggere" : "Unread"} />}
                   </button>
                 </li>
               )

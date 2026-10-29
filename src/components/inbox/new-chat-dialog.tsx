@@ -58,7 +58,7 @@ export function NewChatDialog() {
 
 function NewChatForm({ onDone, Footer, autoFocus }: { onDone: () => void; Footer: React.ComponentType<React.ComponentProps<"div">>; autoFocus: boolean }) {
   const { slug, members, meId } = useInbox()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const router = useRouter()
   const qc = useQueryClient()
   const [selected, setSelected] = useState<string[]>([])
@@ -104,7 +104,7 @@ function NewChatForm({ onDone, Footer, autoFocus }: { onDone: () => void; Footer
                     <button
                       type="button"
                       onClick={() => toggle(id)}
-                      aria-label={`Remove ${memberName(m)}`}
+                      aria-label={`${locale === "it" ? "Rimuovi" : "Remove"} ${memberName(m)}`}
                       className="flex size-5 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       <X className="size-3" />

@@ -29,7 +29,7 @@ export function AuthSettingsForm({
   mode: "private" | "saas"
 }) {
   const form = useSettingsForm("auth", initial)
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const v = form.values
   return (
     <SettingsFormShell form={form}>
@@ -174,7 +174,7 @@ export function AuthSettingsForm({
                   <Link href="/admin/settings/oauth" className="font-medium text-foreground underline underline-offset-2">
                     {t("authOAuthApps")}
                   </Link>{" "}
-                  first.
+                  {locale === "it" ? "prima." : "first."}
                 </>
               )
             }
@@ -194,7 +194,7 @@ export function AuthSettingsForm({
                   <Link href="/admin/settings/oauth" className="font-medium text-foreground underline underline-offset-2">
                     {t("authOAuthApps")}
                   </Link>{" "}
-                  first.
+                  {locale === "it" ? "prima." : "first."}
                 </>
               )
             }

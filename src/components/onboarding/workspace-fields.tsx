@@ -45,7 +45,8 @@ export function WorkspaceFields({
   autoFocus?: boolean
   error?: string | null
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
+  const it = locale === "it"
   const [checked, setChecked] = useState<{ slug: string; result: SlugCheckResult | null } | null>(null)
   const onStatusRef = useRef(onStatus)
   useEffect(() => {
@@ -83,7 +84,7 @@ export function WorkspaceFields({
     <div className="grid gap-5">
       <div className="grid gap-1.5">
         <Label htmlFor="ws-name" className="text-[13px]">
-          Workspace name
+          {it ? "Nome workspace" : "Workspace name"}
         </Label>
         <Input
           id="ws-name"
@@ -98,12 +99,12 @@ export function WorkspaceFields({
             onChange({ name, slug: value.slugEdited ? value.slug : slugifyClient(name), slugEdited: value.slugEdited })
           }}
         />
-        <p className="text-xs text-muted-foreground">Usually your company or team name. You can change it later.</p>
+        <p className="text-xs text-muted-foreground">{it ? "Di solito è il nome dell’azienda o del team. Potrai cambiarlo in seguito." : "Usually your company or team name. You can change it later."}</p>
       </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="ws-slug" className="text-[13px]">
-          Workspace URL
+          {it ? "URL workspace" : "Workspace URL"}
         </Label>
         <div
           className={cn(
@@ -142,25 +143,25 @@ export function WorkspaceFields({
         <p id="ws-slug-status" className="min-h-4 text-xs text-muted-foreground" aria-live="polite">
           {status.state === "available" && (
             <span className="text-emerald-700 dark:text-emerald-400">
-              {appHost}/w/{value.slug} is available
+              {appHost}/w/{value.slug} {it ? "è disponibile" : "is available"}
             </span>
           )}
           {status.state === "unavailable" && (
             <span className="text-destructive">
-              {reason === "reserved" ? "That address is reserved." : "That address is already taken."}{" "}
+              {reason === "reserved" ? (it ? "Questo indirizzo è riservato." : "That address is reserved.") : (it ? "Questo indirizzo è già in uso." : "That address is already taken.")}{" "}
               {suggestion && (
                 <button
                   type="button"
                   className="font-medium underline underline-offset-2"
                   onClick={() => onChange({ ...value, slug: suggestion, slugEdited: true })}
                 >
-                  Use {suggestion}
+                  {it ? "Usa" : "Use"} {suggestion}
                 </button>
               )}
             </span>
           )}
-          {status.state === "idle" && value.slug.length > 0 && value.slug.length < 2 && "Use at least 2 characters."}
-          {status.state === "idle" && !value.slug && "Lowercase letters, numbers and dashes."}
+          {status.state === "idle" && value.slug.length > 0 && value.slug.length < 2 && (it ? "Usa almeno 2 caratteri." : "Use at least 2 characters.")}
+          {status.state === "idle" && !value.slug && (it ? "Lettere minuscole, numeri e trattini." : "Lowercase letters, numbers and dashes.")}
         </p>
       </div>
       {error && (

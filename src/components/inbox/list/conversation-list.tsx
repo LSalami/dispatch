@@ -33,6 +33,7 @@ import { useBoxInfo } from "../box-info"
 import { MobileNavButton } from "../mail-shell"
 import { BulkBar } from "./bulk-bar"
 import { ConversationRow } from "./conversation-row"
+import { useI18n } from "@/lib/i18n"
 
 const EMPTY_FILTERS: ListFilters = {}
 
@@ -54,6 +55,7 @@ function RowSkeleton() {
 
 export function ConversationList({ box }: { box: string }) {
   const { slug, shortcutsEnabled, shortcutScheme } = useInbox()
+  const { locale, t } = useI18n()
   const { can } = useOrg()
   const router = useRouter()
   const qc = useQueryClient()
@@ -145,10 +147,10 @@ export function ConversationList({ box }: { box: string }) {
       if (item.kind === "chat") return
       if (dir === "right") {
         const reopen = item.status === "closed"
-        run([item.id], { status: reopen ? "open" : "closed" }, { undo: reopen ? "Conversation reopened" : "Conversation closed" })
+        run([item.id], { status: reopen ? "open" : "closed" }, { undo: reopen ? t("inboxUiConversationReopened") : t("inboxUiConversationClosed") })
       } else {
         const tomorrow = timePresets().find((p) => p.id === "tomorrow")!
-        run([item.id], { snoozedUntil: tomorrow.date.toISOString() }, { undo: `Snoozed until ${tomorrow.hint}` })
+        run([item.id], { snoozedUntil: tomorrow.date.toISOString() }, { undo: `${t("inboxUiSnoozedUntil")} ${tomorrow.hint}` })
       }
     },
     [run]
@@ -229,14 +231,14 @@ export function ConversationList({ box }: { box: string }) {
               ) : (
                 <info.icon className="size-4 shrink-0 text-muted-foreground max-lg:hidden" aria-hidden />
               )}
-              <h1 className="truncate text-[15px] font-semibold tracking-tight">{isSearch ? (q ? `“${q}”` : "Search") : info.title}</h1>
+              <h1 className="truncate text-[15px] font-semibold tracking-tight">{isSearch ? (q ? `“${q}”` : t("inboxUiSearch")) : info.title}</h1>
               {filters.status && filters.status !== "open" && (
                 <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 font-mono text-[10.5px] text-muted-foreground uppercase">{filters.status}</span>
               )}
             </div>
             {items.length > 0 && !isChats && (
               <Checkbox
-                aria-label="Select all"
+                aria-label={t("inboxUiSelectAll")}
                 className="mr-1 max-md:hidden"
                 checked={false}
                 onCheckedChange={() => inboxUI.set({ selected: new Set(ids) })}
@@ -246,20 +248,20 @@ export function ConversationList({ box }: { box: string }) {
               variant="ghost"
               size="icon"
               className="size-10 md:hidden"
-              aria-label="Search"
+              aria-label={t("inboxUiSearch")}
               onClick={() => inboxUI.set({ paletteOpen: true, paletteQuery: "" })}
             >
               <Search />
             </Button>
             {isChats && can("chats.create") && (
-              <Button variant="ghost" size="icon-sm" className="max-md:hidden" aria-label="New chat" onClick={() => inboxUI.set({ newChatOpen: true })}>
+              <Button variant="ghost" size="icon-sm" className="max-md:hidden" aria-label={t("inboxUiNewChat")} onClick={() => inboxUI.set({ newChatOpen: true })}>
                 <Plus />
               </Button>
             )}
             {!isChats && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon-sm" className={cn("relative max-md:size-10", filtered && "text-foreground")} aria-label="Filter and sort">
+                  <Button variant="ghost" size="icon-sm" className={cn("relative max-md:size-10", filtered && "text-foreground")} aria-label={t("inboxUiFilterSort")}>
                     <ListFilter />
                     {filtered && <span className="absolute top-1 right-1 size-1.5 rounded-full bg-brand" />}
                   </Button>
@@ -267,33 +269,33 @@ export function ConversationList({ box }: { box: string }) {
                 <DropdownMenuContent align="end" className="w-56">
                   {supportsStatusFilter(parsed) && (
                     <>
-                      <DropdownMenuLabel className="text-xs text-muted-foreground">Status</DropdownMenuLabel>
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">{locale === "it" ? "Stato" : "Status"}</DropdownMenuLabel>
                       <DropdownMenuRadioGroup value={filters.status ?? "open"} onValueChange={(v) => setFilter({ status: v as StatusFilter })}>
-                        <DropdownMenuRadioItem value="open">Open</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="closed">Closed</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="all">All</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="open">{locale === "it" ? "Aperte" : "Open"}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="closed">{locale === "it" ? "Chiuse" : "Closed"}</DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="all">{t("inboxUiAll")}</DropdownMenuRadioItem>
                       </DropdownMenuRadioGroup>
                       <DropdownMenuSeparator />
                     </>
                   )}
-                  <DropdownMenuLabel className="text-xs text-muted-foreground">Assignee</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground">{t("inboxUiAssignee")}</DropdownMenuLabel>
                   <DropdownMenuRadioGroup value={filters.assignee ?? "anyone"} onValueChange={(v) => setFilter({ assignee: v as ListFilters["assignee"] })}>
-                    <DropdownMenuRadioItem value="anyone">Anyone</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="me">Assigned to me</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="others">Assigned to others</DropdownMenuRadioItem>
-                    <DropdownMenuRadioItem value="none">Unassigned</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="anyone">{t("inboxUiAnyone")}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="me">{t("inboxUiAssignedMe")}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="others">{t("inboxUiAssignedOthers")}</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="none">{t("inboxUiUnassigned")}</DropdownMenuRadioItem>
                   </DropdownMenuRadioGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={(e) => (e.preventDefault(), setFilter({ unread: !stored.unread }))}>
-                    <Check className={cn(!stored.unread && "opacity-0")} /> Unread only
+                    <Check className={cn(!stored.unread && "opacity-0")} /> {locale === "it" ? "Solo da leggere" : "Unread only"}
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => setFilter({ sort: stored.sort === "oldest" ? "newest" : "oldest" })}>
-                    <ArrowDownUp /> {stored.sort === "oldest" ? "Newest first" : "Oldest first"}
+                    <ArrowDownUp /> {stored.sort === "oldest" ? (locale === "it" ? "Prima le più recenti" : "Newest first") : (locale === "it" ? "Prima le più vecchie" : "Oldest first")}
                   </DropdownMenuItem>
                   {filtered && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onSelect={() => setStored(EMPTY_FILTERS)}>Reset filters</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setStored(EMPTY_FILTERS)}>{locale === "it" ? "Reimposta filtri" : "Reset filters"}</DropdownMenuItem>
                     </>
                   )}
                 </DropdownMenuContent>
@@ -303,7 +305,7 @@ export function ConversationList({ box }: { box: string }) {
               variant="ghost"
               size="icon-sm"
               className="max-md:hidden"
-              aria-label="Refresh"
+              aria-label={locale === "it" ? "Aggiorna" : "Refresh"}
               onClick={() => void qc.invalidateQueries({ queryKey: inboxKeys.list(slug, box, filters) })}
             >
               <RefreshCw className={cn(list.isRefetching && !list.isFetchingNextPage && "animate-spin")} />
@@ -317,18 +319,18 @@ export function ConversationList({ box }: { box: string }) {
 
         {list.isError && (
           <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-            <p className="text-sm font-medium">{list.error.message || "Could not load conversations"}</p>
+            <p className="text-sm font-medium">{list.error.message || (locale === "it" ? "Impossibile caricare le conversazioni" : "Could not load conversations")}</p>
             <Button variant="outline" size="sm" onClick={() => list.refetch()}>
-              Try again
+              {locale === "it" ? "Riprova" : "Try again"}
             </Button>
           </div>
         )}
 
         {isSearch && !q.trim() && (
           <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
-            <p className="text-sm text-muted-foreground">Type a search in the command palette.</p>
+            <p className="text-sm text-muted-foreground">{locale === "it" ? "Inserisci una ricerca nella barra dei comandi." : "Type a search in the command palette."}</p>
             <Button variant="outline" size="sm" onClick={() => inboxUI.set({ paletteOpen: true, paletteQuery: "" })}>
-              Open search
+              {locale === "it" ? "Apri la ricerca" : "Open search"}
             </Button>
           </div>
         )}
@@ -339,27 +341,27 @@ export function ConversationList({ box }: { box: string }) {
               {filtered ? <SearchX className="size-6 text-muted-foreground" /> : <info.icon className="size-6 text-muted-foreground" />}
               {box === "inbox" && !filtered && <span className="absolute -top-1 -right-1 size-3 rounded-full bg-brand ring-4 ring-card" />}
             </span>
-            <p className="text-[15px] font-semibold tracking-tight">{filtered ? "No conversations match your filters" : info.empty.title}</p>
-            <p className="mt-1 max-w-72 text-[13px] text-muted-foreground">{filtered ? "Try a different status or assignee." : info.empty.description}</p>
+            <p className="text-[15px] font-semibold tracking-tight">{filtered ? (locale === "it" ? "Nessuna conversazione corrisponde ai filtri" : "No conversations match your filters") : info.empty.title}</p>
+            <p className="mt-1 max-w-72 text-[13px] text-muted-foreground">{filtered ? (locale === "it" ? "Prova un altro stato o assegnatario." : "Try a different status or assignee.") : info.empty.description}</p>
             <div className="mt-4 flex gap-2">
               {filtered && (
                 <Button variant="outline" size="sm" onClick={() => setStored(EMPTY_FILTERS)}>
-                  Reset filters
+                  {locale === "it" ? "Reimposta filtri" : "Reset filters"}
                 </Button>
               )}
               {!filtered && box === "all" && can("inboxes.manage") && (
                 <Button size="sm" onClick={() => router.push(`/w/${slug}/settings/inboxes`)}>
-                  <Plus /> Connect an inbox
+                  <Plus /> {locale === "it" ? "Collega una casella" : "Connect an inbox"}
                 </Button>
               )}
               {!filtered && isChats && can("chats.create") && (
                 <Button size="sm" onClick={() => inboxUI.set({ newChatOpen: true })}>
-                  <Plus /> Start a chat
+                  <Plus /> {locale === "it" ? "Avvia una chat" : "Start a chat"}
                 </Button>
               )}
               {!filtered && (box === "sent" || box === "drafts") && (
                 <Button size="sm" variant="outline" onClick={() => inboxUI.openCompose()}>
-                  <SquarePen /> Compose
+                  <SquarePen /> {locale === "it" ? "Scrivi" : "Compose"}
                 </Button>
               )}
             </div>
@@ -385,7 +387,7 @@ export function ConversationList({ box }: { box: string }) {
         <div ref={sentinel} />
         {isFetchingNextPage && <RowSkeleton />}
         {!hasNextPage && items.length > 20 && (
-          <p className="py-6 text-center font-mono text-[10.5px] tracking-wider text-muted-foreground uppercase">End of list</p>
+          <p className="py-6 text-center font-mono text-[10.5px] tracking-wider text-muted-foreground uppercase">{locale === "it" ? "Fine dell’elenco" : "End of list"}</p>
         )}
         <div className="h-[calc(env(safe-area-inset-bottom)+5rem)] md:h-[env(safe-area-inset-bottom)]" />
       </div>
@@ -393,7 +395,7 @@ export function ConversationList({ box }: { box: string }) {
         <Button
           size="icon-lg"
           className="absolute right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] size-14 rounded-2xl shadow-lg md:hidden"
-          aria-label={isChats ? "New chat" : "Compose"}
+          aria-label={isChats ? t("inboxUiNewChat") : (locale === "it" ? "Scrivi" : "Compose")}
           onClick={() => (isChats ? inboxUI.set({ newChatOpen: true }) : inboxUI.openCompose())}
         >
           {isChats ? <Plus className="size-6" /> : <SquarePen className="size-6" />}

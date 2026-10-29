@@ -32,6 +32,7 @@ import {
 import type { TaskDto, TaskOptions, TaskPatch } from "./use-tasks"
 import { renderTaskMarkdown } from "./task-markdown"
 import { useI18n } from "@/lib/i18n"
+import { it as dateFnsIt } from "date-fns/locale"
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -81,7 +82,7 @@ function TaskDetailBody({
   onUpdate: (id: string, patch: TaskPatch) => void
   onDelete: (id: string) => void
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   // Local edit state; the component is keyed by task id so it resets per task
   const [title, setTitle] = useState(task.title)
   const [description, setDescription] = useState(task.description ?? "")
@@ -118,7 +119,7 @@ function TaskDetailBody({
           <StatusMenu value={task.status} onChange={(s) => onUpdate(task.id, { status: s })} disabled={!editable}>
             <button type="button" className={cn(fieldButton, "mx-0 h-7 bg-muted/60 px-2 text-xs font-medium")}>
               <StatusIcon status={task.status} className="size-3.5" />
-              {STATUS_META[task.status].label}
+              {locale === "it" ? (task.status === "todo" ? "Da fare" : task.status === "in_progress" ? "In corso" : "Completata") : STATUS_META[task.status].label}
             </button>
           </StatusMenu>
           {task.conversation && (
@@ -167,7 +168,7 @@ function TaskDetailBody({
               <button type="button" className={fieldButton}>
                 <AssigneeAvatar assignee={task.assignee} />
                 <span className={cn("truncate", !task.assignee && "text-muted-foreground")}>
-                  {task.assignee ? task.assignee.name || task.assignee.email : "Unassigned"}
+                  {task.assignee ? task.assignee.name || task.assignee.email : locale === "it" ? "Non assegnata" : "Unassigned"}
                 </span>
               </button>
             </AssigneePicker>
@@ -185,7 +186,7 @@ function TaskDetailBody({
               >
                 <CalendarDays className="size-4 shrink-0 opacity-70" />
                 <span className="truncate">
-                  {task.dueAt ? `${formatDue(task.dueAt, { long: true })} · ${format(new Date(task.dueAt), "MMM d")}` : t("noDueDate")}
+                  {task.dueAt ? `${formatDue(task.dueAt, { long: true, locale })} · ${format(new Date(task.dueAt), "d MMM", locale === "it" ? { locale: dateFnsIt } : undefined)}` : t("noDueDate")}
                 </span>
                 {due === "overdue" && <span className="text-xs font-medium">{t("overdue")}</span>}
               </button>
@@ -223,7 +224,7 @@ function TaskDetailBody({
             {editable && description && (
               <Button variant="ghost" size="xs" onClick={() => setPreview((p) => !p)} className="text-muted-foreground">
                 {preview ? <Pencil /> : <Eye />}
-                {preview ? "Edit" : "Preview"}
+                {preview ? (locale === "it" ? "Modifica" : "Edit") : (locale === "it" ? "Anteprima" : "Preview")}
               </Button>
             )}
           </div>
@@ -242,9 +243,9 @@ function TaskDetailBody({
               disabled={!editable}
               onChange={(e) => setDescription(e.target.value)}
               onBlur={commitDescription}
-              placeholder={editable ? "Add details, links or a checklist… (Markdown supported)" : "No description"}
+              placeholder={editable ? (locale === "it" ? "Aggiungi dettagli, link o una lista… (Markdown supportato)" : "Add details, links or a checklist… (Markdown supported)") : (locale === "it" ? "Nessuna descrizione" : "No description")}
               className="min-h-32 resize-y text-[13.5px] leading-relaxed"
-              aria-label="Description"
+              aria-label={t("description")}
             />
           )}
         </div>
@@ -252,18 +253,20 @@ function TaskDetailBody({
         <div className="mt-6 flex items-center gap-2 border-t pt-4 text-xs text-muted-foreground">
           <AssigneeAvatar assignee={task.createdBy ? { ...task.createdBy, avatarUrl: null } : null} />
           <span>
-            Created by {task.createdBy?.name || task.createdBy?.email || "someone"} ·{" "}
-            <time dateTime={task.createdAt} title={format(new Date(task.createdAt), "PPpp")}>
+            {locale === "it" ? "Creata da" : "Created by"} {task.createdBy?.name || task.createdBy?.email || (locale === "it" ? "qualcuno" : "someone")} ·{" "}
+            <time dateTime={task.createdAt} title={format(new Date(task.createdAt), "PPpp", locale === "it" ? { locale: dateFnsIt } : undefined)}>
               {formatDistanceToNow(new Date(task.createdAt), {
                 addSuffix: true,
+                ...(locale === "it" ? { locale: dateFnsIt } : {}),
               })}
             </time>
             {task.completedAt && (
               <>
                 {" "}
-                · completed{" "}
+                · {locale === "it" ? "completata" : "completed"}{" "}
                 {formatDistanceToNow(new Date(task.completedAt), {
                   addSuffix: true,
+                  ...(locale === "it" ? { locale: dateFnsIt } : {}),
                 })}
               </>
             )}
@@ -274,15 +277,15 @@ function TaskDetailBody({
       {editable && (
         <SheetFooter className="safe-bottom flex-row items-center justify-between gap-2 border-t px-5 py-3">
           <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive" onClick={() => setConfirmDelete(true)}>
-            <Trash2 /> Delete
+            <Trash2 /> {locale === "it" ? "Elimina" : "Delete"}
           </Button>
           {task.status === "done" ? (
             <Button variant="outline" size="sm" onClick={() => onUpdate(task.id, { status: "todo" })}>
-              <RotateCcw /> Reopen
+              <RotateCcw /> {locale === "it" ? "Riapri" : "Reopen"}
             </Button>
           ) : (
             <Button size="sm" onClick={() => onUpdate(task.id, { status: "done" })}>
-              <CheckCircle2 /> Mark done
+              <CheckCircle2 /> {locale === "it" ? "Segna come completata" : "Mark done"}
             </Button>
           )}
         </SheetFooter>
@@ -291,11 +294,11 @@ function TaskDetailBody({
       <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this task?</AlertDialogTitle>
-            <AlertDialogDescription>“{task.title}” will be removed for everyone. This can’t be undone.</AlertDialogDescription>
+            <AlertDialogTitle>{locale === "it" ? "Eliminare questa attività?" : "Delete this task?"}</AlertDialogTitle>
+            <AlertDialogDescription>{locale === "it" ? `“${task.title}” verrà rimossa per tutti. L’operazione non si può annullare.` : `“${task.title}” will be removed for everyone. This can’t be undone.`}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{locale === "it" ? "Annulla" : "Cancel"}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={() => {
@@ -303,7 +306,7 @@ function TaskDetailBody({
                 onOpenChange(false)
               }}
             >
-              Delete task
+              {locale === "it" ? "Elimina attività" : "Delete task"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

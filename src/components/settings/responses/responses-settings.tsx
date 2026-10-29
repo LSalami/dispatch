@@ -72,7 +72,7 @@ export function ResponsesSettings({
   teams: TeamOption[]
   canManageShared: boolean
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [query, setQuery] = useState("")
   const [filter, setFilter] = useState<Filter>("all")
   const [editing, setEditing] = useState<ResponseDraft | null>(null)
@@ -216,7 +216,7 @@ export function ResponsesSettings({
                     <span className="text-xs text-muted-foreground tabular-nums">
                       {r.usageCount > 0 ? `${t("respUsed")} ${pluralize(r.usageCount, "time")}` : t("respNotUsed")}
                     </span>
-                    <span className="hidden text-xs text-muted-foreground sm:inline">Updated <LocalTime date={r.updatedAt} format="relative" />
+                    <span className="hidden text-xs text-muted-foreground sm:inline">{locale === "it" ? "Aggiornata" : "Updated"} <LocalTime date={r.updatedAt} format="relative" />
                     </span>
                   </span>
                 </button>

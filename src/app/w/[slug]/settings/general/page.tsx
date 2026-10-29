@@ -40,7 +40,7 @@ export default async function GeneralSettingsPage({ params }: PageProps<"/w/[slu
   const defaultRoleId = selectableRoles.some((r) => r.id === s.defaultRoleId) ? s.defaultRoleId! : (memberRole?.id ?? selectableRoles[0]?.id ?? "")
 
   return (
-    <SettingsPage eyebrow="Workspace" title="General" quiet="settings" description={`Manage ${ctx.org.name}'s profile, defaults and access.`}>
+    <SettingsPage eyebrow="Workspace" title={ctx.user.locale === "it" ? "Generale" : "General"} quiet={ctx.user.locale === "it" ? "impostazioni" : "settings"} description={ctx.user.locale === "it" ? `Gestisci il profilo, le impostazioni predefinite e gli accessi di ${ctx.org.name}.` : `Manage ${ctx.org.name}'s profile, defaults and access.`}>
       <IdentitySection
         slug={ctx.org.slug}
         name={ctx.org.name}

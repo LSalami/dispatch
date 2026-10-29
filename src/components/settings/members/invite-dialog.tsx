@@ -14,7 +14,7 @@ import { parseEmailList } from "@/components/settings/members/parse-emails"
 import { inviteMembersAction } from "@/server/workspace/actions/members"
 import type { MembersPageData } from "@/server/workspace/queries/members"
 import { cn } from "@/lib/utils"
-import { useI18n } from "@/lib/i18n"
+import { localizeRoleName, useI18n } from "@/lib/i18n"
 
 type InviteResult = {
   invited: { id: string; email: string; url: string; delivered: boolean }[]
@@ -37,7 +37,7 @@ export function InviteDialog({
   defaultRoleId: string | null
   emailDelivery: boolean
 }) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const grantable = roles.filter((r) => r.grantable)
   const initialRole =
     grantable.find((r) => r.id === defaultRoleId)?.id ?? grantable.find((r) => r.key === "member")?.id ?? grantable[0]?.id ?? ""
@@ -137,7 +137,7 @@ export function InviteDialog({
                     {roles.map((r) => (
                       <SelectItem key={r.id} value={r.id} disabled={!r.grantable}>
                         <ColorDot color={r.color ?? "#64748b"} className="size-2" />
-                        {r.name}
+                        {localizeRoleName(r.key, r.name, locale)}
                       </SelectItem>
                     ))}
                   </SelectContent>
