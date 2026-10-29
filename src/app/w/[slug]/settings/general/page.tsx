@@ -11,6 +11,7 @@ import { PUBLIC_EMAIL_DOMAINS, verifiedAdminDomains } from "@/server/workspace/s
 import { SettingsPage } from "@/components/settings/settings-ui"
 import { IdentitySection } from "@/components/settings/general/identity-section"
 import { BusinessHoursSection, ConversationSection } from "@/components/settings/general/behaviour-sections"
+import { WorkspaceFeaturesSection } from "@/components/settings/general/features-section"
 import { AccessSection } from "@/components/settings/general/access-section"
 import { AiSection, type AiMode } from "@/components/settings/general/ai-section"
 import { DangerZone, DemoDataSection } from "@/components/settings/general/danger-zone"
@@ -57,6 +58,7 @@ export default async function GeneralSettingsPage({ params }: PageProps<"/w/[slu
           undoSendSeconds: typeof s.undoSendSeconds === "number" ? s.undoSendSeconds : 5,
         }}
       />
+      <WorkspaceFeaturesSection slug={ctx.org.slug} chatEnabled={s.features?.chat !== false} />
       <BusinessHoursSection
         slug={ctx.org.slug}
         timezone={timezone}

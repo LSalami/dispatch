@@ -262,6 +262,7 @@ export type OrgSettings = {
   ipAllowlist?: string[]
   sessionMaxDays?: number
   /** AI (optional BYO key overrides instance defaults) */
+  features?: { chat?: boolean }
   ai?: {
     enabled?: boolean
     provider?: "anthropic" | "openai"

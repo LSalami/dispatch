@@ -146,6 +146,18 @@ export const updateConversationBehaviour = action(
   }
 )
 
+export const updateWorkspaceFeatures = action(
+  z.object({ slug, chat: z.boolean() }),
+  async ({ slug: s, chat }) => {
+    const ctx = await workspaceAction(s, "settings.manage")
+    await patchOrgSettings(ctx.org.id, (cur) => ({ ...cur, features: { ...cur.features, chat } }))
+    await auditAction(ctx, "settings.updated", { type: "organization", id: ctx.org.id }, { section: "features", chat })
+    await publish({ orgId: ctx.org.id, type: "org.updated", actorId: ctx.user.id })
+    revalidateWorkspace()
+    return { chat }
+  }
+)
+
 export const updateBusinessHours = action(
   z.object({
     slug,

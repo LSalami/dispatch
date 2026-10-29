@@ -189,7 +189,7 @@ function labelTree(labels: LabelSummary[]): LabelNode[] {
 export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; onCollapse?: () => void }) {
   const shortcutLabel = useShortcutLabel()
   const { slug, bootstrap, member, meId } = useInbox()
-  const { can } = useOrg()
+  const { can, org } = useOrg()
   const { t, locale } = useI18n()
   const [customizeOpen, setCustomizeOpen] = useState(false)
   const initialSidebarPreferences = bootstrap.me.preferences.sidebar as
@@ -409,7 +409,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           </Section>
         )}
 
-        {(!hiddenSections.includes("chats") || current === "chats") && <Section
+        {org.features.chat && (!hiddenSections.includes("chats") || current === "chats") && <Section
           id="chats"
           title={t("inboxUiChats")}
           action={
@@ -546,7 +546,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             <p className="mb-2 text-xs text-muted-foreground">
               {locale === "it" ? "Le sezioni nascoste spariscono dalla barra, ma puoi riattivarle da qui." : "Hidden sections disappear from the sidebar, but you can turn them back on here."}
             </p>
-            {CUSTOMIZABLE_SECTIONS.map((section) => {
+            {CUSTOMIZABLE_SECTIONS.filter((section) => section !== "chats" || org.features.chat).map((section) => {
               const labels: Record<CustomizableSection, string> = {
                 teams: t("teams"),
                 inboxes: t("inboxes"),

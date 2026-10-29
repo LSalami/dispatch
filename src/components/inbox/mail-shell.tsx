@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { PanelLeft } from "lucide-react"
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { useOrg } from "@/components/app/org-provider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { inboxUI, useInboxUI } from "@/hooks/inbox/store"
 import { useHotkeys } from "@/hooks/inbox/use-hotkeys"
@@ -41,6 +42,7 @@ export function MailShell({ slug, bootstrap, children }: { slug: string; bootstr
 
 function ShellInner({ children }: { children: React.ReactNode }) {
   const { slug, meId, bootstrap, shortcutsEnabled, shortcutScheme } = useInbox()
+  const { org } = useOrg()
   const { locale } = useI18n()
   const router = useRouter()
   const [width, setWidth] = usePersistentState("dispatch:sidebar:width", SIDEBAR.default)
@@ -89,11 +91,15 @@ function ShellInner({ children }: { children: React.ReactNode }) {
       { keys: k("goStarred"), handler: () => go("starred") },
       { keys: k("goDrafts"), handler: () => go("drafts") },
       { keys: k("goMentions"), handler: () => go("mentions") },
-      { keys: k("goChats"), handler: () => go("chats") },
       { keys: k("goSent"), handler: () => go("sent") },
       { keys: k("goAll"), handler: () => go("all") },
       { keys: k("goTeam"), handler: () => (firstTeam ? go(`team.${firstTeam.id}`) : go("unassigned")) },
-      { keys: k("newChat"), allowInInput: true, handler: () => inboxUI.set({ newChatOpen: true }) },
+      ...(org.features.chat
+        ? [
+            { keys: k("goChats"), handler: () => go("chats") },
+            { keys: k("newChat"), allowInInput: true, handler: () => inboxUI.set({ newChatOpen: true }) },
+          ]
+        : []),
     ],
     shortcutsEnabled
   )

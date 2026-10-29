@@ -126,7 +126,7 @@ function ResultRow({ item, meId }: { item: ConversationListItem; meId: string })
 export function CommandPalette() {
   const { slug, meId, bootstrap, member } = useInbox()
   const { t, locale } = useI18n()
-  const { can } = useOrg()
+  const { can, org } = useOrg()
   const router = useRouter()
   const params = useParams<{ box?: string }>()
   const { resolvedTheme, setTheme } = useTheme()
@@ -164,7 +164,7 @@ export function CommandPalette() {
   const searchAll = () => run(() => router.push(`${base}/search?q=${encodeURIComponent(q)}`))
 
   const goTo = useMemo<StaticItem[]>(() => {
-    const items: StaticItem[] = STATIC_BOXES.filter((b) => b !== "search").map((b) => ({
+    const items: StaticItem[] = STATIC_BOXES.filter((b) => b !== "search" && (b !== "chats" || org.features.chat)).map((b) => ({
       id: `box:${b}`,
       label: localizeDictionaryText(STATIC_BOX_META[b].title, locale) as string,
       keywords: `${b} ${STATIC_BOX_META[b].description}`,
@@ -199,13 +199,13 @@ export function CommandPalette() {
       { id: "page:settings", label: locale === "it" ? "Impostazioni" : "Settings", keywords: "preferences workspace", icon: Settings, run: () => router.push(`${base}/settings`) }
     )
     return items
-  }, [bootstrap.teams, bootstrap.accounts, bootstrap.labels, chats, base, router, can, member, meId, combo, locale])
+  }, [bootstrap.teams, bootstrap.accounts, bootstrap.labels, chats, base, router, can, member, meId, combo, locale, org.features.chat])
 
   const actions = useMemo<StaticItem[]>(() => {
     const list: StaticItem[] = [
       { id: "action:compose", label: locale === "it" ? "Scrivi un nuovo messaggio" : "Compose new message", keywords: "write email new", icon: SquarePen, shortcut: combo("compose"), run: () => inboxUI.openCompose() },
     ]
-    if (can("chats.create")) {
+    if (org.features.chat && can("chats.create")) {
       list.push({ id: "action:chat", label: locale === "it" ? "Nuova chat" : "New chat", keywords: "message teammate dm group", icon: MessagesSquare, shortcut: combo("newChat"), run: () => inboxUI.set({ newChatOpen: true }) })
     }
     list.push(
@@ -219,7 +219,7 @@ export function CommandPalette() {
       { id: "action:shortcuts", label: t("inboxUiKeyboard"), keywords: "help keys hotkeys", icon: Keyboard, shortcut: combo("help"), run: () => inboxUI.set({ shortcutsOpen: true }) }
     )
     return list
-  }, [can, resolvedTheme, setTheme, combo, locale, t])
+  }, [can, org.features.chat, resolvedTheme, setTheme, combo, locale, t])
 
   // Operator hints: all when empty, otherwise those completing the last word.
   const lastWord = query.endsWith(" ") ? "" : (query.split(/\s+/).pop() ?? "")

@@ -37,6 +37,7 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
       plan: ctx.org.plan,
       subscriptionStatus: ctx.org.subscriptionStatus,
       trialEndsAt: ctx.org.trialEndsAt?.toISOString() ?? null,
+      features: { chat: ctx.org.settings.features?.chat !== false },
     },
     user: {
       id: ctx.user.id,

@@ -8,6 +8,7 @@ import { useShortcutLabel } from "@/hooks/inbox/use-hotkeys"
 import { SHORTCUTS, type ShortcutAction, type ShortcutGroup, type ShortcutScheme } from "@/lib/inbox/shortcuts"
 import { useInbox } from "./inbox-provider"
 import { useI18n } from "@/lib/i18n"
+import { useOrg } from "@/components/app/org-provider"
 
 type Shortcut = { keys: string[]; label: string }
 type Group = { title: string; items: Shortcut[] }
@@ -53,11 +54,12 @@ function Keys({ combo }: { combo: string }) {
 export function ShortcutsDialog() {
   const open = useInboxUI((s) => s.shortcutsOpen)
   const { shortcutScheme, shortcutsEnabled } = useInbox()
+  const { org } = useOrg()
   const { t, locale } = useI18n()
   const groups = groupsFor(shortcutScheme).map((group) => ({
     ...group,
     title: locale === "it" ? ({ Navigation: "Navigazione", Conversation: "Conversazione", General: "Generali", Composer: "Composizione" }[group.title] ?? group.title) : group.title,
-    items: group.items.map((item) => ({
+    items: group.items.filter((item) => org.features.chat || !["Go to Chats", "New chat"].includes(item.label)).map((item) => ({
       ...item,
       label: locale === "it" ? ({
         "Next conversation": "Conversazione successiva", "Previous conversation": "Conversazione precedente", "Open conversation": "Apri conversazione", "Back to the list": "Torna all’elenco", "Search & commands": "Cerca e usa i comandi", "Go to Inbox": "Vai alla posta in arrivo", "Go to Assigned to me": "Vai alle assegnate a me", "Go to Starred": "Vai alle speciali", "Go to Drafts": "Vai alle bozze", "Go to Mentions": "Vai alle menzioni", "Go to Chats": "Vai alle chat", "Go to your team": "Vai al tuo team", "Go to Sent": "Vai alle inviate", "Go to All conversations": "Vai a tutte le conversazioni", "Close / reopen": "Chiudi / riapri", Reply: "Rispondi", "Reply all": "Rispondi a tutti", Forward: "Inoltra", Comment: "Commenta", Star: "Aggiungi ai preferiti", Snooze: "Posticipa", Labels: "Etichette", Assign: "Assegna", "Assign to me": "Assegna a me", "Move to team": "Sposta nel team", "Toggle priority": "Attiva/disattiva priorità", "Mute notifications": "Silenzia notifiche", "Mark as read": "Segna come letta", "Mark as unread": "Segna come da leggere", "Move to trash": "Sposta nel cestino", "Mark as spam": "Segna come spam", Select: "Seleziona", "Select all": "Seleziona tutto", "New message": "Nuovo messaggio", "New chat": "Nuova chat", "Keyboard shortcuts": "Scorciatoie da tastiera", Send: "Invia", "Send & close": "Invia e chiudi", "Close the composer": "Chiudi la composizione" } as Record<string, string>)[item.label] ?? item.label : item.label,
