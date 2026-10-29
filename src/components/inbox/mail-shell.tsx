@@ -94,7 +94,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
       { keys: k("goSent"), handler: () => go("sent") },
       { keys: k("goAll"), handler: () => go("all") },
       { keys: k("goTeam"), handler: () => (firstTeam ? go(`team.${firstTeam.id}`) : go("unassigned")) },
-      ...(org.features.chat
+      ...(org.features.chat && !org.navigation.hiddenSections.includes("chats")
         ? [
             { keys: k("goChats"), handler: () => go("chats") },
             { keys: k("newChat"), allowInInput: true, handler: () => inboxUI.set({ newChatOpen: true }) },

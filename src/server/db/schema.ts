@@ -263,6 +263,8 @@ export type OrgSettings = {
   sessionMaxDays?: number
   /** AI (optional BYO key overrides instance defaults) */
   features?: { chat?: boolean }
+  /** Workspace-wide navigation visibility. Hiding items never removes access or data. */
+  navigation?: { hiddenItems?: string[]; hiddenSections?: string[] }
   ai?: {
     enabled?: boolean
     provider?: "anthropic" | "openai"

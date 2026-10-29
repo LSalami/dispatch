@@ -207,7 +207,9 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
   const [showMore, setShowMore] = usePersistentState("dispatch:sidebar:more", false)
   const base = `/w/${slug}`
   const tree = useMemo(() => labelTree(bootstrap.labels), [bootstrap.labels])
-  const hiddenPrimary = PRIMARY.filter((item) => CUSTOMIZABLE_BOXES.includes(item.box as CustomizableBox) && hiddenItems.includes(item.box as CustomizableBox))
+  const workspaceHiddenItems = org.navigation.hiddenItems
+  const workspaceHiddenSections = org.navigation.hiddenSections
+  const hiddenPrimary = PRIMARY.filter((item) => CUSTOMIZABLE_BOXES.includes(item.box as CustomizableBox) && hiddenItems.includes(item.box as CustomizableBox) && !workspaceHiddenItems.includes(item.box))
   const moreItems = [...MORE, ...hiddenPrimary]
   const moreActive = moreItems.some((m) => m.box === current)
   const boxLabel: Record<string, Parameters<typeof t>[0]> = { inbox: "inbox", assigned: "assigned", mentions: "mentions", starred: "starred", snoozed: "snoozed", drafts: "drafts", scheduled: "scheduled", sent: "sent", unassigned: "unassigned", all: "allConversations", closed: "closed", spam: "spam", trash: "trash" }
@@ -304,7 +306,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
 
       <nav aria-label={t("inboxUiMailboxes")} className="scrollbar-thin min-h-0 flex-1 overflow-y-auto px-2 pb-4">
         <div className="flex flex-col gap-px">
-          {PRIMARY.filter((item) => !hiddenItems.includes(item.box as CustomizableBox) || current === item.box).map((item) => (
+        {PRIMARY.filter((item) => !workspaceHiddenItems.includes(item.box) && (!hiddenItems.includes(item.box as CustomizableBox) || current === item.box)).map((item) => (
             <NavItem
               key={item.box}
               href={`${base}/${item.box}`}
@@ -339,7 +341,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             ))}
         </div>
 
-        {bootstrap.teams.length > 0 && (!hiddenSections.includes("teams") || current.startsWith("team.")) && (
+        {bootstrap.teams.length > 0 && !workspaceHiddenSections.includes("teams") && (!hiddenSections.includes("teams") || current.startsWith("team.")) && (
           <Section id="teams" title={t("teams")}>
             {bootstrap.teams
               .filter((t) => t.isMember || can("conversations.view_all"))
@@ -358,7 +360,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           </Section>
         )}
 
-        {bootstrap.accounts.length > 0 && (!hiddenSections.includes("inboxes") || current.startsWith("inbox.")) && (
+        {bootstrap.accounts.length > 0 && !workspaceHiddenSections.includes("inboxes") && (!hiddenSections.includes("inboxes") || current.startsWith("inbox.")) && (
           <Section
             id="inboxes"
             title={t("inboxes")}
@@ -403,13 +405,13 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
           </Section>
         )}
 
-        {tree.length > 0 && (!hiddenSections.includes("labels") || current.startsWith("label.")) && (
+        {tree.length > 0 && !workspaceHiddenSections.includes("labels") && (!hiddenSections.includes("labels") || current.startsWith("label.")) && (
           <Section id="labels" title={t("labels")}>
             {tree.map((l) => renderLabel(l, 0))}
           </Section>
         )}
 
-        {org.features.chat && (!hiddenSections.includes("chats") || current === "chats") && <Section
+        {org.features.chat && !workspaceHiddenSections.includes("chats") && (!hiddenSections.includes("chats") || current === "chats") && <Section
           id="chats"
           title={t("inboxUiChats")}
           action={
@@ -462,7 +464,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
       <div className="flex shrink-0 items-center gap-0.5 border-t border-sidebar-border px-2 py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
         <UserMenu compact className="mr-auto" />
         <NotificationsButton onNavigate={onNavigate} />
-        <Tooltip>
+        {!workspaceHiddenSections.includes("tasks") && <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" asChild className="max-lg:size-10">
               <Link href={`${base}/tasks`} onClick={onNavigate} aria-label={t("inboxUiTasks")}>
@@ -471,8 +473,8 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t("inboxUiTasks")}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
+        </Tooltip>}
+        {!workspaceHiddenSections.includes("contacts") && <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" asChild className="max-lg:size-10">
               <Link href={`${base}/contacts`} onClick={onNavigate} aria-label={t("inboxUiContacts")}>
@@ -481,7 +483,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             </Button>
           </TooltipTrigger>
           <TooltipContent>{t("inboxUiContacts")}</TooltipContent>
-        </Tooltip>
+        </Tooltip>}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon-sm" asChild className="max-lg:size-10">
@@ -514,7 +516,8 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
             </p>
             {PRIMARY.map((item) => {
               const customizable = CUSTOMIZABLE_BOXES.includes(item.box as CustomizableBox)
-              const visible = !hiddenItems.includes(item.box as CustomizableBox)
+              const workspaceDisabled = workspaceHiddenItems.includes(item.box)
+              const visible = !workspaceDisabled && !hiddenItems.includes(item.box as CustomizableBox)
               const id = `sidebar-item-${item.box}`
               return (
                 <div key={item.box} className="flex items-center justify-between gap-4 rounded-md px-2 py-2 hover:bg-muted/50">
@@ -524,7 +527,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                   <Switch
                     id={id}
                     checked={visible}
-                    disabled={!customizable || savingSidebar}
+                    disabled={!customizable || workspaceDisabled || savingSidebar}
                     aria-label={locale === "it" ? `Mostra ${t(boxLabel[item.box] ?? "inbox")}` : `Show ${t(boxLabel[item.box] ?? "inbox")}`}
                     onCheckedChange={(checked) => {
                       if (!customizable) return
@@ -553,7 +556,8 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                 labels: t("labels"),
                 chats: t("inboxUiChats"),
               }
-              const visible = !hiddenSections.includes(section)
+              const workspaceDisabled = workspaceHiddenSections.includes(section)
+              const visible = !workspaceDisabled && !hiddenSections.includes(section)
               const id = `sidebar-section-${section}`
               return (
                 <div key={section} className="flex items-center justify-between gap-4 rounded-md px-2 py-2 hover:bg-muted/50">
@@ -563,7 +567,7 @@ export function Sidebar({ onNavigate, onCollapse }: { onNavigate?: () => void; o
                   <Switch
                     id={id}
                     checked={visible}
-                    disabled={savingSidebar}
+                    disabled={workspaceDisabled || savingSidebar}
                     aria-label={locale === "it" ? `Mostra sezione ${labels[section]}` : `Show ${labels[section]} section`}
                     onCheckedChange={(checked) => {
                       const next = checked

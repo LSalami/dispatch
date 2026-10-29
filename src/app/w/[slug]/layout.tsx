@@ -38,6 +38,10 @@ export default async function WorkspaceLayout({ children, params }: LayoutProps<
       subscriptionStatus: ctx.org.subscriptionStatus,
       trialEndsAt: ctx.org.trialEndsAt?.toISOString() ?? null,
       features: { chat: ctx.org.settings.features?.chat !== false },
+      navigation: {
+        hiddenItems: ctx.org.settings.navigation?.hiddenItems ?? [],
+        hiddenSections: ctx.org.settings.navigation?.hiddenSections ?? [],
+      },
     },
     user: {
       id: ctx.user.id,

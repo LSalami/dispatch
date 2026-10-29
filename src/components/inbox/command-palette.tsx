@@ -148,7 +148,8 @@ export function CommandPalette() {
   const search = useSearch(slug, debounced)
   // useSearch's inferred data type includes the placeholder function; narrow it.
   const found: ConversationListItem[] = search.data ?? []
-  const results = searchable && q.length >= 2 ? found : []
+  const chatVisible = org.features.chat && !org.navigation.hiddenSections.includes("chats")
+  const results = searchable && q.length >= 2 ? found.filter((item) => item.kind !== "chat" || chatVisible) : []
 
   const close = () => inboxUI.set({ paletteOpen: false })
   const run = (fn: () => void) => {
@@ -164,7 +165,12 @@ export function CommandPalette() {
   const searchAll = () => run(() => router.push(`${base}/search?q=${encodeURIComponent(q)}`))
 
   const goTo = useMemo<StaticItem[]>(() => {
-    const items: StaticItem[] = STATIC_BOXES.filter((b) => b !== "search" && (b !== "chats" || org.features.chat)).map((b) => ({
+    const items: StaticItem[] = STATIC_BOXES.filter((b) =>
+      b !== "search" &&
+      (b !== "chats" || org.features.chat) &&
+      (b !== "chats" || !org.navigation.hiddenSections.includes("chats")) &&
+      !org.navigation.hiddenItems.includes(b)
+    ).map((b) => ({
       id: `box:${b}`,
       label: localizeDictionaryText(STATIC_BOX_META[b].title, locale) as string,
       keywords: `${b} ${STATIC_BOX_META[b].description}`,
@@ -172,17 +178,17 @@ export function CommandPalette() {
       shortcut: BOX_SHORTCUTS[b] ? combo(BOX_SHORTCUTS[b]) : undefined,
       run: () => router.push(`${base}/${b}`),
     }))
-    for (const t of bootstrap.teams) {
+    for (const t of org.navigation.hiddenSections.includes("teams") ? [] : bootstrap.teams) {
       if (!t.isMember && !can("conversations.view_all")) continue
       items.push({ id: `team:${t.id}`, label: t.name, keywords: "team", color: t.color, run: () => router.push(`${base}/team.${t.id}`) })
     }
-    for (const a of bootstrap.accounts) {
+    for (const a of org.navigation.hiddenSections.includes("inboxes") ? [] : bootstrap.accounts) {
       items.push({ id: `inbox:${a.id}`, label: a.name, keywords: `inbox ${a.email}`, color: a.color, run: () => router.push(`${base}/inbox.${a.id}`) })
     }
-    for (const l of bootstrap.labels) {
+    for (const l of org.navigation.hiddenSections.includes("labels") ? [] : bootstrap.labels) {
       items.push({ id: `label:${l.id}`, label: l.name, keywords: "label tag", color: l.color, run: () => router.push(`${base}/label.${l.id}`) })
     }
-    for (const c of chats) {
+    for (const c of chatVisible ? chats : []) {
       const other = c.isDirect ? member(c.memberIds.find((id) => id !== meId)) : undefined
       items.push({
         id: `chat:${c.id}`,
@@ -193,19 +199,17 @@ export function CommandPalette() {
         run: () => router.push(`${base}/chats/${c.id}`),
       })
     }
-    items.push(
-      { id: "page:tasks", label: locale === "it" ? "Attività" : "Tasks", keywords: "todo", icon: SquareCheckBig, run: () => router.push(`${base}/tasks`) },
-      { id: "page:contacts", label: locale === "it" ? "Contatti" : "Contacts", keywords: "people address book", icon: Contact, run: () => router.push(`${base}/contacts`) },
-      { id: "page:settings", label: locale === "it" ? "Impostazioni" : "Settings", keywords: "preferences workspace", icon: Settings, run: () => router.push(`${base}/settings`) }
-    )
+    if (!org.navigation.hiddenSections.includes("tasks")) items.push({ id: "page:tasks", label: locale === "it" ? "Attività" : "Tasks", keywords: "todo", icon: SquareCheckBig, run: () => router.push(`${base}/tasks`) })
+    if (!org.navigation.hiddenSections.includes("contacts")) items.push({ id: "page:contacts", label: locale === "it" ? "Contatti" : "Contacts", keywords: "people address book", icon: Contact, run: () => router.push(`${base}/contacts`) })
+    items.push({ id: "page:settings", label: locale === "it" ? "Impostazioni" : "Settings", keywords: "preferences workspace", icon: Settings, run: () => router.push(`${base}/settings`) })
     return items
-  }, [bootstrap.teams, bootstrap.accounts, bootstrap.labels, chats, base, router, can, member, meId, combo, locale, org.features.chat])
+  }, [bootstrap.teams, bootstrap.accounts, bootstrap.labels, chats, base, router, can, member, meId, combo, locale, org.features.chat, org.navigation])
 
   const actions = useMemo<StaticItem[]>(() => {
     const list: StaticItem[] = [
       { id: "action:compose", label: locale === "it" ? "Scrivi un nuovo messaggio" : "Compose new message", keywords: "write email new", icon: SquarePen, shortcut: combo("compose"), run: () => inboxUI.openCompose() },
     ]
-    if (org.features.chat && can("chats.create")) {
+    if (chatVisible && can("chats.create")) {
       list.push({ id: "action:chat", label: locale === "it" ? "Nuova chat" : "New chat", keywords: "message teammate dm group", icon: MessagesSquare, shortcut: combo("newChat"), run: () => inboxUI.set({ newChatOpen: true }) })
     }
     list.push(
@@ -219,7 +223,7 @@ export function CommandPalette() {
       { id: "action:shortcuts", label: t("inboxUiKeyboard"), keywords: "help keys hotkeys", icon: Keyboard, shortcut: combo("help"), run: () => inboxUI.set({ shortcutsOpen: true }) }
     )
     return list
-  }, [can, org.features.chat, resolvedTheme, setTheme, combo, locale, t])
+  }, [can, org.features.chat, org.navigation, resolvedTheme, setTheme, combo, locale, t])
 
   // Operator hints: all when empty, otherwise those completing the last word.
   const lastWord = query.endsWith(" ") ? "" : (query.split(/\s+/).pop() ?? "")
